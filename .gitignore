@@ -5,7 +5,9 @@
 /vendor
 .env
 .env.backup
+.phpstorm.meta.php
 .phpunit.result.cache
+_ide_helper.php
 docker-compose.override.yml
 Homestead.json
 Homestead.yaml
