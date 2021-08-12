@@ -19,7 +19,7 @@ class Schema extends SchemaProvider
      */
     public function getId($resource): string
     {
-        return $resource->getName();
+        return $resource->getId();
     }
 
     /**
@@ -36,6 +36,7 @@ class Schema extends SchemaProvider
             'hair_color' => $resource->getHairColor(),
             'height' => $resource->getHeight(),
             'mass' => $resource->getMass(),
+            'skin_color' => $resource->getSkinColor(),
             'homeworld' => $resource->getHomeworld(),
             'created' => $resource->getCreated(),
             'edited' => $resource->getEdited(),

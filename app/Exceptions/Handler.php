@@ -22,7 +22,7 @@ class Handler extends ExceptionHandler
      * @var array
      */
     protected $dontReport = [
-        JsonApiException::class,
+//        JsonApiException::class,
     ];
 
     /**
@@ -50,18 +50,18 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $e): Response|JsonResponse|\Symfony\Component\HttpFoundation\Response
     {
-        if ($this->isJsonApi($request, $e)) {
-            return $this->renderJsonApi($request, $e);
-        }
+//        if ($this->isJsonApi($request, $e)) {
+//            return $this->renderJsonApi($request, $e);
+//        }
 
         return parent::render($request, $e);
     }
 
     protected function prepareException(Throwable $e): HttpException|NotFoundHttpException|Throwable|AccessDeniedHttpException
     {
-        if ($e instanceof JsonApiException) {
-            return $this->prepareJsonApiException($e);
-        }
+//        if ($e instanceof JsonApiException) {
+//            return $this->prepareJsonApiException($e);
+//        }
 
         return parent::prepareException($e);
     }

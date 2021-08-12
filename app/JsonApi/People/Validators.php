@@ -6,6 +6,9 @@ use CloudCreativity\LaravelJsonApi\Validation\AbstractValidators;
 
 class Validators extends AbstractValidators
 {
+    protected $allowedSortParameters = [];
+
+    protected $allowedPagingParameters = ['number'];
 
     /**
      * Get the validation rules for the resource.
@@ -26,7 +29,9 @@ class Validators extends AbstractValidators
      */
     protected function queryRules(): array
     {
-        return [];
+        return [
+            'page.number' => 'numeric|min:1,'
+        ];
     }
 
 }

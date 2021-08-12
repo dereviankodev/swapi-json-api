@@ -82,7 +82,7 @@ return [
     | override it; if the setting is `false`, then `--eloquent` is the override.
     |
     */
-    'use-eloquent' => true,
+    'use-eloquent' => false,
 
     /*
     |--------------------------------------------------------------------------

@@ -2,8 +2,6 @@
 
 use CloudCreativity\LaravelJsonApi\Facades\JsonApi;
 use CloudCreativity\LaravelJsonApi\Routing\RouteRegistrar as Api;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +14,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-JsonApi::register('v1')->routes(function (Api $api) {
-    $api->resource('people')->only('index', 'read');
+JsonApi::register('v1')->withNamespace('Api')->routes(function (Api $api) {
+    // People
+    $api->resource('people')/*->controller()->routes(function ($people) {
+        $people->get('/', 'index')->name('api.people.index');
+        $people->get('{record}', 'show')->name('api.films.show');
+        $people->get('schema', 'schema')->name('api.films.schema');
+    })*/;
 });
