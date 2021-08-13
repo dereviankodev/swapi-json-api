@@ -13,12 +13,17 @@ class PeopleRepository
 {
     use CacheService;
 
+    private const RESOURCE_NAME = 'people';
+
     private ?array $people = null;
     private ?array $paginationParameters = null;
 
+    /**
+     * @throws JsonApiException
+     */
     public function all(): Generator
     {
-        if (!is_array($this->people)) {
+        if (is_null($this->people)) {
             $cacheKey = request()->fullUrl();
 
             if ($this->isCached($cacheKey)) {
@@ -34,6 +39,24 @@ class PeopleRepository
         }
     }
 
+    /**
+     * @throws JsonApiException
+     */
+    public function find($resourceId)
+    {
+        $cacheKey = request()->fullUrl();
+
+        if ($this->isCached($cacheKey)) {
+            $data = Cache::get($cacheKey);
+            return People::create($data);
+        }
+
+        $data = $this->load($resourceId);
+        $this->people = $this->putDataIntoCache($cacheKey, $data);
+
+        return People::create($data);
+    }
+
     public function setPaginationParameters(array|null $paginationParameters): void
     {
         $this->paginationParameters = $paginationParameters;
@@ -47,9 +70,9 @@ class PeopleRepository
     /**
      * @throws JsonApiException
      */
-    private function load()
+    private function load(int $resourceId = null)
     {
-        $data = Http::get('https://swapi.dev/api/people/', [
+        $data = Http::get('https://swapi.dev/api/people/' . $resourceId, [
             'page' => $this->getPaginationNumber()
         ]);
 
