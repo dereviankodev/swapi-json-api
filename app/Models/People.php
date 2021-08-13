@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
- * @var int|null $id
+ * @var int $id
  * @var string|null $name
  * @var string|null $birth_year
  * @var string|null $eye_color
@@ -18,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @var string|null $edited
  * @var string|null $url
  */
-class People extends Model
+class People extends BaseModel
 {
     public static function create(array $attributes): self
     {
