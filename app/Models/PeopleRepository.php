@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Services\Cache\CacheService;
+use CloudCreativity\LaravelJsonApi\Document\Error\Error;
+use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
 use Generator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -22,7 +24,8 @@ class PeopleRepository
             if ($this->isCached($cacheKey)) {
                 $this->people = Cache::get($cacheKey);
             } else {
-                $this->people = $this->putDataIntoCache($cacheKey, $this->load());
+                $data = $this->load();
+                $this->people = $this->putDataIntoCache($cacheKey, $data);
             }
         }
 
@@ -41,11 +44,23 @@ class PeopleRepository
         return $this->paginationParameters;
     }
 
+    /**
+     * @throws JsonApiException
+     */
     private function load()
     {
         $data = Http::get('https://swapi.dev/api/people/', [
             'page' => $this->getPaginationNumber()
         ]);
+
+        if ($data->clientError()) {
+            $error = Error::fromArray([
+                'status' => $data->status(),
+                'title' => $data->object()->detail,
+            ]);
+
+            throw new JsonApiException($error);
+        }
 
         return json_decode($data, true);
     }
