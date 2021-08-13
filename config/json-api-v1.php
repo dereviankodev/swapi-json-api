@@ -66,7 +66,8 @@ return [
     | `'posts' => App\Post::class`
     */
     'resources' => [
-        'people' => App\Models\People::class
+        'people' => App\Models\People::class,
+        'planets' => App\Models\Planet::class
     ],
 
     /*

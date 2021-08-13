@@ -42,4 +42,17 @@ class Schema extends SchemaProvider
             'edited' => $resource->getEdited(),
         ];
     }
+
+    public function getRelationships($resource, $isPrimary, array $includeRelationships)
+    {
+        return [
+            'planet' => [
+                self::SHOW_SELF => true,
+                self::SHOW_RELATED => true,
+//                self::DATA => function () use ($resource) {
+//                    return basename($resource->getHomeworld());
+//                }
+            ]
+        ];
+    }
 }
