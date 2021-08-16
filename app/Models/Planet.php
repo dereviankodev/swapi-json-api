@@ -2,23 +2,56 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Str;
+
 /**
- * @var int $id
- * @var string|null $name
- * @var string|null $diameter
- * @var string|null $rotation_period
- * @var string|null $orbital_period
- * @var string|null $gravity
- * @var string|null $population
- * @var string|null $climate
- * @var string|null $terrain
- * @var string|null $surface_water
- * @var string|null $created
- * @var string|null $edited
- * @var string|null $url
+ * @method int getId()
+ * @method string getName()
+ * @method void setName(string $name)
+ * @method string getDiameter()
+ * @method void setDiameter(string $diameter)
+ * @method string getRotationPeriod()
+ * @method void setRotationPeriod(string $rotation_period)
+ * @method string getOrbitalPeriod()
+ * @method void setOrbitalPeriod(string $orbital_period)
+ * @method string getGravity()
+ * @method void setGravity(string $gravity)
+ * @method string getPopulation()
+ * @method void setPopulation(string $population)
+ * @method string getClimate()
+ * @method void setClimate(string $climate)
+ * @method string getTerrain()
+ * @method void setTerrain(string $terrain)
+ * @method string getSurfaceWater()
+ * @method void setSurfaceWater(string $surface_water)
+ * @method array getResidents()
+ * @method string getCreated()
+ * @method void setCreated(string $created)
+ * @method string getEdited()
+ * @method void setEdited(string $edited)
+ * @method string getUrl()
+ * @method void setUrl(string $url)
  */
 class Planet extends BaseModel
 {
+    /**
+     * @return string|void
+     */
+    public function __call(string $name, array $arguments)
+    {
+        $startsWith = substr($name, 0, 3);
+        $methodName = Str::snake(substr($name, 3));
+
+        $match = match ($startsWith) {
+            'set' => $this->setAttribute($methodName, $arguments[0]),
+            'get' => $this->getAttribute($methodName)
+        };
+
+        if (is_string($match) || is_array($match)) {
+            return $match;
+        }
+    }
+
     public static function create(array $attributes): self
     {
         $planet = new self();
@@ -36,17 +69,10 @@ class Planet extends BaseModel
         $planet->setCreated($attributes['created']);
         $planet->setEdited($attributes['edited']);
         $planet->setUrl($attributes['url']);
+        // Relationship
+        $planet->setResidents($attributes['residents']);
 
         return $planet;
-    }
-
-    #-----------------------------------------------------------------
-    # Accessors and Mutators
-    #-----------------------------------------------------------------
-
-    public function getId(): int
-    {
-        return $this->getAttribute('id');
     }
 
     public function setId(string $url): void
@@ -54,21 +80,19 @@ class Planet extends BaseModel
         $this->setAttribute('id', basename($url));
     }
 
-    public function getName(): string|null
+    public function setResidents(array $residents): void
     {
-        return $this->getAttribute('name');
-    }
+        $residentList = [];
+        foreach ($residents as $resident) {
+            $urlPath = parse_url($resident, PHP_URL_PATH);
+            $explodeUrlPath = explode('/', trim($urlPath, '/'));
+            $residentData = [
+                'type' => $explodeUrlPath[1],
+                'id' => $explodeUrlPath[2]
+            ];
+            $residentList[] = $residentData;
+        }
 
-    public function setName(string $name): void
-    {
-        $this->setAttribute('name', $name);
+        $this->setAttribute('residents', $residentList);
     }
-
-//    public function setDiameter(string $diameter)
-//    {
-//    }
-//
-//    public function setRotationPeriod(string $rotation_period)
-//    {
-//    }
 }

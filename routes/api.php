@@ -14,13 +14,14 @@ use CloudCreativity\LaravelJsonApi\Routing\RouteRegistrar as Api;
 |
 */
 
-JsonApi::register('v1')->withNamespace('Api')->routes(function (Api $api) {
+JsonApi::register('v1')->routes(function (Api $api) {
     // People
     $api->resource('people', [
         'has-one' => 'planet'
-    ])/*->controller()->routes(function ($people) {
-        $people->get('/', 'index')->name('api.people.index');
-        $people->get('{record}', 'show')->name('api.films.show');
-        $people->get('schema', 'schema')->name('api.films.schema');
-    })*/;
+    ]);
+
+    // Planets
+    $api->resource('planets', [
+        'has-many' => 'people'
+    ]);
 });
