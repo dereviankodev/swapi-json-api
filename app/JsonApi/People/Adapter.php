@@ -4,14 +4,14 @@ namespace App\JsonApi\People;
 
 use App\Models\PeopleRepository;
 use CloudCreativity\LaravelJsonApi\Adapter\AbstractResourceAdapter;
-use CloudCreativity\LaravelJsonApi\Contracts\Pagination\PagingStrategyInterface;
 use CloudCreativity\LaravelJsonApi\Document\Error\Error;
 use CloudCreativity\LaravelJsonApi\Document\ResourceObject;
 use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
 use Illuminate\Support\Collection;
 use Neomerx\JsonApi\Contracts\Encoder\Parameters\EncodingParametersInterface;
+use RuntimeException;
 
-class Adapter extends AbstractResourceAdapter/* implements PagingStrategyInterface*/
+class Adapter extends AbstractResourceAdapter
 {
     private PeopleRepository $repository;
 
@@ -22,35 +22,44 @@ class Adapter extends AbstractResourceAdapter/* implements PagingStrategyInterfa
 
     protected function createRecord(ResourceObject $resource)
     {
-        throw new \RuntimeException('Not implemented');
+        throw new RuntimeException('Not implemented');
     }
 
     protected function fillAttributes($record, Collection $attributes)
     {
-        throw new \RuntimeException('Not implemented');
+        throw new RuntimeException('Not implemented');
     }
 
     protected function persist($record)
     {
-        throw new \RuntimeException('Not implemented');
+        throw new RuntimeException('Not implemented');
     }
 
     protected function destroy($record)
     {
-        throw new \RuntimeException('Not implemented');
+        throw new RuntimeException('Not implemented');
     }
 
+    /**
+     * @throws JsonApiException
+     */
     public function query(EncodingParametersInterface $parameters)
     {
         $this->repository->setPaginationParameters($parameters->getPaginationParameters());
         return $this->repository->all();
     }
 
+    /**
+     * @throws JsonApiException
+     */
     public function exists(string $resourceId): bool
     {
         return !is_null($this->find($resourceId));
     }
 
+    /**
+     * @throws JsonApiException
+     */
     public function find(string $resourceId)
     {
         if (!is_numeric($resourceId) || $resourceId < 1) {
@@ -68,6 +77,6 @@ class Adapter extends AbstractResourceAdapter/* implements PagingStrategyInterfa
 
     public function findMany(iterable $resourceIds): iterable
     {
-        throw new \RuntimeException('Not implemented');
+        throw new RuntimeException('Not implemented');
     }
 }

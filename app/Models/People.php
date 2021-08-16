@@ -2,22 +2,54 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Str;
+
 /**
- * @var int $id
- * @var string|null $name
- * @var string|null $birth_year
- * @var string|null $eye_color
- * @var string|null $gender
- * @var string|null $hair_color
- * @var string|null $height
- * @var string|null $mass
- * @var string|null $homeworld
- * @var string|null $created
- * @var string|null $edited
- * @var string|null $url
+ * @method int getId()
+ * @method string getName()
+ * @method void setName(string $name)
+ * @method string getBirthYear()
+ * @method void setBirthYear(string $birth_year)
+ * @method string getEyeColor()
+ * @method void setEyeColor(string $eye_color)
+ * @method string getGender()
+ * @method void setGender(string $gender)
+ * @method string getHairColor()
+ * @method void setHairColor(string $hair_color)
+ * @method string getHeight()
+ * @method void setHeight(string $height)
+ * @method string getMass()
+ * @method void setMass(string $mass)
+ * @method string getSkinColor()
+ * @method void setSkinColor(string $skin_color)
+ * @method array getHomeworld()
+ * @method string getCreated()
+ * @method void setCreated(string $created)
+ * @method string getEdited()
+ * @method void setEdited(string $edited)
+ * @method string getUrl()
+ * @method void setUrl(string $url)
  */
 class People extends BaseModel
 {
+    /**
+     * @return string|void
+     */
+    public function __call(string $name, array $arguments)
+    {
+        $startsWith = substr($name, 0, 3);
+        $methodName = Str::snake(substr($name, 3));
+
+        $match = match ($startsWith) {
+            'set' => $this->setAttribute($methodName, $arguments[0]),
+            'get' => $this->getAttribute($methodName)
+        };
+
+        if (is_string($match) || is_array($match)) {
+            return $match;
+        }
+    }
+
     public static function create(array $attributes): self
     {
         $people = new self();
@@ -31,21 +63,13 @@ class People extends BaseModel
         $people->setHeight($attributes['height']);
         $people->setMass($attributes['mass']);
         $people->setSkinColor($attributes['skin_color']);
-        $people->setHomeworld($attributes['homeworld']);
         $people->setCreated($attributes['created']);
         $people->setEdited($attributes['edited']);
         $people->setUrl($attributes['url']);
+        // Relationship
+        $people->setHomeworld($attributes['homeworld']);
 
         return $people;
-    }
-
-    #-----------------------------------------------------------------
-    # Accessors and Mutators
-    #-----------------------------------------------------------------
-
-    public function getId(): int
-    {
-        return $this->getAttribute('id');
     }
 
     public function setId(string $url): void
@@ -53,123 +77,15 @@ class People extends BaseModel
         $this->setAttribute('id', basename($url));
     }
 
-    public function getName(): string|null
-    {
-        return $this->getAttribute('name');
-    }
-
-    public function setName(string $name): void
-    {
-        $this->setAttribute('name', $name);
-    }
-
-    public function getBirthYear(): string|null
-    {
-        return $this->getAttribute('birth_year');
-    }
-
-    public function setBirthYear(string $birth_year): void
-    {
-        $this->setAttribute('birth_year', $birth_year);
-    }
-
-    public function getEyeColor(): string|null
-    {
-        return $this->getAttribute('eye_color');
-    }
-
-    public function setEyeColor(string $eye_color): void
-    {
-        $this->setAttribute('eye_color', $eye_color);
-    }
-
-    public function getGender(): string|null
-    {
-        return $this->getAttribute('gender');
-    }
-
-    public function setGender(string $gender): void
-    {
-        $this->setAttribute('gender', $gender);
-    }
-
-    public function getHairColor(): string|null
-    {
-        return $this->getAttribute('hair_color');
-    }
-
-    public function setHairColor(string $hair_color): void
-    {
-        $this->setAttribute('hair_color', $hair_color);
-    }
-
-    public function getHeight(): string|null
-    {
-        return $this->getAttribute('height');
-    }
-
-    public function setHeight(string $height): void
-    {
-        $this->setAttribute('height', $height);
-    }
-
-    public function getMass(): string|null
-    {
-        return $this->getAttribute('mass');
-    }
-
-    public function setMass(string $mass): void
-    {
-        $this->setAttribute('mass', $mass);
-    }
-
-    public function getSkinColor(): string|null
-    {
-        return $this->getAttribute('skin_color');
-    }
-
-    public function setSkinColor(string $skin_color): void
-    {
-        $this->setAttribute('skin_color', $skin_color);
-    }
-
-    public function getHomeworld(): string|null
-    {
-        return $this->getAttribute('homeworld');
-    }
-
     public function setHomeworld(string $homeworld): void
     {
+        $urlPath = parse_url($homeworld, PHP_URL_PATH);
+        $explodeUrlPath = explode('/', trim($urlPath, '/'));
+        $homeworld = [
+            'type' => $explodeUrlPath[1],
+            'id' => $explodeUrlPath[2]
+        ];
+
         $this->setAttribute('homeworld', $homeworld);
-    }
-
-    public function getUrl(): string|null
-    {
-        return $this->getAttribute('url');
-    }
-
-    public function setUrl(string $url): void
-    {
-        $this->setAttribute('url', $url);
-    }
-
-    public function getCreated(): string|null
-    {
-        return $this->getAttribute('created');
-    }
-
-    public function setCreated(string $created): void
-    {
-        $this->setAttribute('created', $created);
-    }
-
-    public function getEdited(): string|null
-    {
-        return $this->getAttribute('edited');
-    }
-
-    public function setEdited(string $edited): void
-    {
-        $this->setAttribute('edited', $edited);
     }
 }

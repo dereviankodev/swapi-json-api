@@ -42,7 +42,7 @@ class PeopleRepository
     /**
      * @throws JsonApiException
      */
-    public function find($resourceId)
+    public function find($resourceId): People
     {
         $cacheKey = request()->fullUrl();
 
