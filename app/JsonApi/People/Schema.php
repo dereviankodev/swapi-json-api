@@ -67,9 +67,9 @@ class Schema extends SchemaProvider
     {
         return [
             'planet' => [
-                self::SHOW_SELF => true,
-                self::SHOW_RELATED => true,
-                self::SHOW_DATA => true,
+                self::SHOW_SELF => $isPrimary,
+                self::SHOW_RELATED => $isPrimary,
+                self::SHOW_DATA => isset($includeRelationships['planet']) || !$isPrimary,
                 self::DATA => function () use ($resource) {
                     $homeworldData = $resource->getHomeworld();
                     $planet = new Planet();
@@ -79,5 +79,10 @@ class Schema extends SchemaProvider
                 }
             ]
         ];
+    }
+
+    public function getIncludedResourceLinks($resource): array
+    {
+        return parent::getResourceLinks($resource);
     }
 }

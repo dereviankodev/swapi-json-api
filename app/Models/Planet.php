@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
 use Illuminate\Support\Str;
 
 /**
@@ -24,16 +25,29 @@ use Illuminate\Support\Str;
  * @method void setTerrain(string $terrain)
  * @method string getSurfaceWater()
  * @method void setSurfaceWater(string $surface_water)
- * @method array getResidents()
  * @method string getCreated()
  * @method void setCreated(string $created)
  * @method string getEdited()
  * @method void setEdited(string $edited)
  * @method string getUrl()
  * @method void setUrl(string $url)
+ *
+ * @method array getResidents()
  */
 class Planet extends BaseModel
 {
+    /**
+     * @throws JsonApiException
+     */
+    public function relationLoaded($arguments): bool
+    {
+        if (!array_key_exists($arguments, $this->relations)) {
+            return $this->relationLoad();
+        }
+
+        return true;
+    }
+
     /**
      * @return string|void
      */
@@ -47,7 +61,7 @@ class Planet extends BaseModel
             'get' => $this->getAttribute($methodName)
         };
 
-        if (is_string($match) || is_array($match)) {
+        if ($startsWith === 'get') {
             return $match;
         }
     }
@@ -84,15 +98,35 @@ class Planet extends BaseModel
     {
         $residentList = [];
         foreach ($residents as $resident) {
+            if (is_array($resident)) {
+                $residentList[] = $residents;
+                break;
+            }
+
             $urlPath = parse_url($resident, PHP_URL_PATH);
             $explodeUrlPath = explode('/', trim($urlPath, '/'));
             $residentData = [
                 'type' => $explodeUrlPath[1],
-                'id' => $explodeUrlPath[2]
+                'id' => $explodeUrlPath[2],
             ];
             $residentList[] = $residentData;
         }
 
         $this->setAttribute('residents', $residentList);
+    }
+
+    /**
+     * @throws JsonApiException
+     */
+    private function relationLoad(): bool
+    {
+        $planetRepository = new PlanetRepository();
+        $this->relations = $planetRepository->find($this->getId())->getAttributes();
+
+        if (self::create($this->relations)) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -4,6 +4,7 @@ namespace App\JsonApi\Planets;
 
 use App\Models\People;
 use App\Models\Planet;
+use App\Models\PlanetRepository;
 use Neomerx\JsonApi\Schema\SchemaProvider;
 
 class Schema extends SchemaProvider
@@ -69,10 +70,16 @@ class Schema extends SchemaProvider
     {
         return [
             'people' => [
-                self::SHOW_SELF => true,
-                self::SHOW_RELATED => true,
+                self::SHOW_SELF => $isPrimary,
+                self::SHOW_RELATED => $isPrimary,
+                self::SHOW_DATA => isset($includeRelationships['people']) || !$isPrimary,
                 self::DATA => function () use ($resource) {
                     $residents = $resource->getResidents();
+                    if (is_null($residents)) {
+                        $planetRepository = new PlanetRepository();
+                        $planet = $planetRepository->find($resource->getId());
+                        $residents = $planet->getResidents();
+                    }
                     $residentList = [];
 
                     foreach ($residents as $resident) {
@@ -85,5 +92,10 @@ class Schema extends SchemaProvider
                 }
             ]
         ];
+    }
+
+    public function getIncludedResourceLinks($resource): array
+    {
+        return parent::getResourceLinks($resource);
     }
 }

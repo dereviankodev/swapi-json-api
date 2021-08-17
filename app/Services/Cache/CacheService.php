@@ -21,4 +21,13 @@ trait CacheService
         // Return value.
         return $value;
     }
+
+    protected function isCached($cacheKey): bool
+    {
+        if (Cache::has($cacheKey)) {
+            return true;
+        }
+
+        return false;
+    }
 }

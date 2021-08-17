@@ -6,8 +6,9 @@ use CloudCreativity\LaravelJsonApi\Validation\AbstractValidators;
 
 class Validators extends AbstractValidators
 {
-    protected $allowedSortParameters = [];
+    protected $allowedIncludePaths = ['people'];
     protected $allowedPagingParameters = ['number'];
+    protected $allowedSortParameters = [];
 
     protected function rules($record, array $data): array
     {

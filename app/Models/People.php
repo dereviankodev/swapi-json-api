@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
 use Illuminate\Support\Str;
 
 /**
@@ -22,13 +23,14 @@ use Illuminate\Support\Str;
  * @method void setMass(string $mass)
  * @method string getSkinColor()
  * @method void setSkinColor(string $skin_color)
- * @method array getHomeworld()
  * @method string getCreated()
  * @method void setCreated(string $created)
  * @method string getEdited()
  * @method void setEdited(string $edited)
  * @method string getUrl()
  * @method void setUrl(string $url)
+ *
+ * @method array getHomeworld()
  */
 class People extends BaseModel
 {
@@ -72,20 +74,49 @@ class People extends BaseModel
         return $people;
     }
 
+    /**
+     * @throws JsonApiException
+     */
+    public function relationLoaded($arguments): bool
+    {
+        if (!array_key_exists($arguments, $this->relations)) {
+            return $this->relationLoad();
+        }
+
+        return true;
+    }
+
     public function setId(string $url): void
     {
         $this->setAttribute('id', basename($url));
     }
 
-    public function setHomeworld(string $homeworld): void
+    public function setHomeworld(mixed $homeworld): void
     {
-        $urlPath = parse_url($homeworld, PHP_URL_PATH);
-        $explodeUrlPath = explode('/', trim($urlPath, '/'));
-        $homeworld = [
-            'type' => $explodeUrlPath[1],
-            'id' => $explodeUrlPath[2]
-        ];
+        if (!is_array($homeworld)) {
+            $urlPath = parse_url($homeworld, PHP_URL_PATH);
+            $explodeUrlPath = explode('/', trim($urlPath, '/'));
+            $homeworld = [
+                'type' => $explodeUrlPath[1],
+                'id' => $explodeUrlPath[2]
+            ];
+        }
 
         $this->setAttribute('homeworld', $homeworld);
+    }
+
+    /**
+     * @throws JsonApiException
+     */
+    private function relationLoad(): bool
+    {
+        $planetRepository = new PeopleRepository();
+        $this->relations = $planetRepository->find($this->getId())->getAttributes();
+
+        if (self::create($this->relations)) {
+            return true;
+        }
+
+        return false;
     }
 }

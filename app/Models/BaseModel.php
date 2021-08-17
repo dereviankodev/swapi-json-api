@@ -10,6 +10,7 @@ class BaseModel
 
     private bool $timestamps = false;
     private bool $incrementing = false;
+    protected array $relations = [];
 
     /**
      * Determine if the model uses timestamps.
