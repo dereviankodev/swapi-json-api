@@ -37,18 +37,6 @@ use Illuminate\Support\Str;
 class Planet extends BaseModel
 {
     /**
-     * @throws JsonApiException
-     */
-    public function relationLoaded($arguments): bool
-    {
-        if (!array_key_exists($arguments, $this->relations)) {
-            return $this->relationLoad();
-        }
-
-        return true;
-    }
-
-    /**
      * @return string|void
      */
     public function __call(string $name, array $arguments)
@@ -66,9 +54,9 @@ class Planet extends BaseModel
         }
     }
 
-    public static function create(array $attributes): self
+    public static function create(array $attributes): static
     {
-        $planet = new self();
+        $planet = new static();
 
         $planet->setId($attributes['url']);
         $planet->setName($attributes['name']);
@@ -87,6 +75,18 @@ class Planet extends BaseModel
         $planet->setResidents($attributes['residents']);
 
         return $planet;
+    }
+
+    /**
+     * @throws JsonApiException
+     */
+    public function relationLoaded($arguments): bool
+    {
+        if (!array_key_exists($arguments, $this->relations)) {
+            return $this->relationLoad();
+        }
+
+        return true;
     }
 
     public function setId(string $url): void
@@ -123,7 +123,7 @@ class Planet extends BaseModel
         $planetRepository = new PlanetRepository();
         $this->relations = $planetRepository->find($this->getId())->getAttributes();
 
-        if (self::create($this->relations)) {
+        if (static::create($this->relations)) {
             return true;
         }
 

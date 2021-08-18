@@ -28,16 +28,16 @@ return [
     | your root namespace.
     |
     | - true:
-    |   - e.g. App\JsonApi\Posts\{Adapter, Schema, Validators}
-    |   - e.g. App\JsonApi\Comments\{Adapter, Schema, Validators}
+    |   - e.g. App\JsonApi\Posts\{PeopleAdapter, PeopleSchema, PeopleValidators}
+    |   - e.g. App\JsonApi\Comments\{PeopleAdapter, PeopleSchema, PeopleValidators}
     | - false:
     |   - e.g. App\JsonApi\Adapters\PostAdapter, CommentAdapter}
     |   - e.g. App\JsonApi\Schemas\{PostSchema, CommentSchema}
-    |   - e.g. App\JsonApi\Validators\{PostValidator, CommentValidator}
+    |   - e.g. App\JsonApi\PeopleValidators\{PostValidator, CommentValidator}
     |
     */
     'namespace' => null,
-    'by-resource' => true,
+    'by-resource' => false,
 
     /*
     |--------------------------------------------------------------------------

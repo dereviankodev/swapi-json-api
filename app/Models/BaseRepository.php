@@ -13,17 +13,19 @@ class BaseRepository
 
     protected const BASE_URL_API = 'https://swapi.dev/api';
 
-    public ?array $paginationParameters = null;
     protected array $resource = [];
+    private array $paginationParameters = [];
 
-    public function setPaginationParameters(array|null $paginationParameters): void
+    public function additionalPageInfo(): array
     {
-        $this->paginationParameters = $paginationParameters;
+        return [
+            'total' => $this->resource['count']
+        ];
     }
 
-    public function getPaginationParameters(): array
+    protected function setPaginationParameters($paginationParameters): void
     {
-        return $this->paginationParameters;
+        $this->paginationParameters = $paginationParameters ?? [];
     }
 
     protected function getPaginationNumber()

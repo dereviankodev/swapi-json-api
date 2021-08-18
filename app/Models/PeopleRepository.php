@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
-use Generator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class PeopleRepository extends BaseRepository
@@ -13,8 +13,12 @@ class PeopleRepository extends BaseRepository
     /**
      * @throws JsonApiException
      */
-    public function all(): Generator
+    public function all($parameters): Collection
     {
+        if (is_array($parameters)) {
+            $this->setPaginationParameters($parameters);
+        }
+
         if (empty($this->resource)) {
             $cacheKey = request()->fullUrl();
 
@@ -26,9 +30,15 @@ class PeopleRepository extends BaseRepository
             }
         }
 
+        $data = [];
+
         foreach ($this->resource['results'] as $attributes) {
-            yield People::create($attributes);
+            $data['results'][] = People::create($attributes);
         }
+
+        $data['additional_page_info'] = $this->additionalPageInfo();
+
+        return collect($data);
     }
 
     /**
@@ -44,7 +54,6 @@ class PeopleRepository extends BaseRepository
             $this->resource = $this->load($resourceId);
             $this->putDataIntoCache($cacheKey, $this->resource);
         }
-
 
         return People::create($this->resource);
     }

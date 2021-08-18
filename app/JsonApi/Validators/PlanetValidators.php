@@ -1,13 +1,14 @@
 <?php
 
-namespace App\JsonApi\Planets;
+namespace App\JsonApi\Validators;
 
 use CloudCreativity\LaravelJsonApi\Validation\AbstractValidators;
 
-class Validators extends AbstractValidators
+class PlanetValidators extends AbstractValidators
 {
     protected $allowedIncludePaths = ['people'];
-    protected $allowedPagingParameters = ['number'];
+    protected $allowedPagingParameters = ['number', 'size'];
+    protected $allowedFilteringParameters = ['name'];
     protected $allowedSortParameters = [];
 
     protected function rules($record, array $data): array
@@ -18,7 +19,9 @@ class Validators extends AbstractValidators
     protected function queryRules(): array
     {
         return [
-            'page.number' => 'numeric|min:1,'
+            'page.number' => 'filled|numeric|min:1,',
+            'page.size' => 'filled|numeric|',
+            'filter.name' => 'filled|string'
         ];
     }
 }

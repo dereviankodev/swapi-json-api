@@ -52,9 +52,9 @@ class People extends BaseModel
         }
     }
 
-    public static function create(array $attributes): self
+    public static function create(array $attributes): static
     {
-        $people = new self();
+        $people = new static();
 
         $people->setId($attributes['url']);
         $people->setName($attributes['name']);
@@ -113,7 +113,7 @@ class People extends BaseModel
         $planetRepository = new PeopleRepository();
         $this->relations = $planetRepository->find($this->getId())->getAttributes();
 
-        if (self::create($this->relations)) {
+        if (static::create($this->relations)) {
             return true;
         }
 

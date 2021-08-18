@@ -1,13 +1,13 @@
 <?php
 
-namespace App\JsonApi\Planets;
+namespace App\JsonApi\Schemas;
 
 use App\Models\People;
 use App\Models\Planet;
 use App\Models\PlanetRepository;
 use Neomerx\JsonApi\Schema\SchemaProvider;
 
-class Schema extends SchemaProvider
+class PlanetSchema extends SchemaProvider
 {
     /**
      * @var string

@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
-use Generator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class PlanetRepository extends BaseRepository
@@ -13,8 +13,12 @@ class PlanetRepository extends BaseRepository
     /**
      * @throws JsonApiException
      */
-    public function all(): Generator
+    public function all($parameters): Collection
     {
+        if (is_array($parameters)) {
+            $this->setPaginationParameters($parameters);
+        }
+
         if (empty($this->resource)) {
             $cacheKey = request()->fullUrl();
 
@@ -26,9 +30,15 @@ class PlanetRepository extends BaseRepository
             }
         }
 
+        $data = [];
+
         foreach ($this->resource['results'] as $attributes) {
-            yield Planet::create($attributes);
+            $data['results'][] = Planet::create($attributes);
         }
+
+        $data['additional_page_info'] = $this->additionalPageInfo();
+
+        return collect($data);
     }
 
     /**
