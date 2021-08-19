@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
-use Illuminate\Support\Str;
 
 /**
  * @method int getId()
@@ -34,24 +33,6 @@ use Illuminate\Support\Str;
  */
 class People extends BaseModel
 {
-    /**
-     * @return string|void
-     */
-    public function __call(string $name, array $arguments)
-    {
-        $startsWith = substr($name, 0, 3);
-        $methodName = Str::snake(substr($name, 3));
-
-        $match = match ($startsWith) {
-            'set' => $this->setAttribute($methodName, $arguments[0]),
-            'get' => $this->getAttribute($methodName)
-        };
-
-        if (is_string($match) || is_array($match)) {
-            return $match;
-        }
-    }
-
     public static function create(array $attributes): static
     {
         $people = new static();
@@ -74,23 +55,6 @@ class People extends BaseModel
         return $people;
     }
 
-    /**
-     * @throws JsonApiException
-     */
-    public function relationLoaded($arguments): bool
-    {
-        if (!array_key_exists($arguments, $this->relations)) {
-            return $this->relationLoad();
-        }
-
-        return true;
-    }
-
-    public function setId(string $url): void
-    {
-        $this->setAttribute('id', basename($url));
-    }
-
     public function setHomeworld(mixed $homeworld): void
     {
         if (!is_array($homeworld)) {
@@ -108,15 +72,27 @@ class People extends BaseModel
     /**
      * @throws JsonApiException
      */
-    private function relationLoad(): bool
+    public function planet(): ?Planet
     {
-        $planetRepository = new PeopleRepository();
-        $this->relations = $planetRepository->find($this->getId())->getAttributes();
+        $planet = $this->getHomeworld();
+        $planetRepository = new PlanetRepository();
+        $attributes = $planetRepository->find($planet['id'])->getAttributes();
 
-        if (static::create($this->relations)) {
-            return true;
+        if ($relation = Planet::create($attributes)) {
+            return $relation;
         }
 
-        return false;
+        return null;
+    }
+
+    public function relationLoaded($arguments): bool
+    {
+        if (!array_key_exists($arguments, $this->relations)) {
+            $peopleRepository = new PeopleRepository();
+            $id = $this->getId();
+            return $this->relationLoad($peopleRepository, $id);
+        }
+
+        return true;
     }
 }

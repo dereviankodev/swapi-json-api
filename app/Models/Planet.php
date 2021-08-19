@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
-use Illuminate\Support\Str;
 
 /**
  * @method int getId()
@@ -36,24 +35,6 @@ use Illuminate\Support\Str;
  */
 class Planet extends BaseModel
 {
-    /**
-     * @return string|void
-     */
-    public function __call(string $name, array $arguments)
-    {
-        $startsWith = substr($name, 0, 3);
-        $methodName = Str::snake(substr($name, 3));
-
-        $match = match ($startsWith) {
-            'set' => $this->setAttribute($methodName, $arguments[0]),
-            'get' => $this->getAttribute($methodName)
-        };
-
-        if ($startsWith === 'get') {
-            return $match;
-        }
-    }
-
     public static function create(array $attributes): static
     {
         $planet = new static();
@@ -75,23 +56,6 @@ class Planet extends BaseModel
         $planet->setResidents($attributes['residents']);
 
         return $planet;
-    }
-
-    /**
-     * @throws JsonApiException
-     */
-    public function relationLoaded($arguments): bool
-    {
-        if (!array_key_exists($arguments, $this->relations)) {
-            return $this->relationLoad();
-        }
-
-        return true;
-    }
-
-    public function setId(string $url): void
-    {
-        $this->setAttribute('id', basename($url));
     }
 
     public function setResidents(array $residents): void
@@ -118,15 +82,28 @@ class Planet extends BaseModel
     /**
      * @throws JsonApiException
      */
-    private function relationLoad(): bool
+    public function people(): array
     {
-        $planetRepository = new PlanetRepository();
-        $this->relations = $planetRepository->find($this->getId())->getAttributes();
+        $people = $this->getResidents();
+        $relations = null;
 
-        if (static::create($this->relations)) {
-            return true;
+        foreach ($people as $person) {
+            $peopleRepository = new PeopleRepository();
+            $attributes = $peopleRepository->find($person['id'])->getAttributes();
+            $relations[] = People::create($attributes);
         }
 
-        return false;
+        return $relations;
+    }
+
+    public function relationLoaded($arguments): bool
+    {
+        if (!array_key_exists($arguments, $this->relations)) {
+            $peopleRepository = new PlanetRepository();
+            $id = $this->getId();
+            return $this->relationLoad($peopleRepository, $id);
+        }
+
+        return true;
     }
 }

@@ -5,9 +5,8 @@ namespace App\JsonApi\Schemas;
 use App\Models\People;
 use App\Models\Planet;
 use App\Models\PlanetRepository;
-use Neomerx\JsonApi\Schema\SchemaProvider;
 
-class PlanetSchema extends SchemaProvider
+class PlanetSchema extends AbstractBaseSchema
 {
     /**
      * @var string
@@ -33,15 +32,6 @@ class PlanetSchema extends SchemaProvider
     protected array $relationships = [
         'people',
     ];
-
-    /**
-     * @param Planet $resource
-     * @return string
-     */
-    public function getId($resource): string
-    {
-        return $resource->getId();
-    }
 
     /**
      * @param Planet $resource
@@ -92,10 +82,5 @@ class PlanetSchema extends SchemaProvider
                 }
             ]
         ];
-    }
-
-    public function getIncludedResourceLinks($resource): array
-    {
-        return parent::getResourceLinks($resource);
     }
 }

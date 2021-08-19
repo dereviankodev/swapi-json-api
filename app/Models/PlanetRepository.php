@@ -15,9 +15,7 @@ class PlanetRepository extends BaseRepository
      */
     public function all($parameters): Collection
     {
-        if (is_array($parameters)) {
-            $this->setPaginationParameters($parameters);
-        }
+        $this->fillParameters($parameters);
 
         if (empty($this->resource)) {
             $cacheKey = request()->fullUrl();
@@ -30,13 +28,14 @@ class PlanetRepository extends BaseRepository
             }
         }
 
-        $data = [];
+        $data = [
+            'results' => [],
+            'additional_page_info' => $this->additionalPageInfo()
+        ];
 
         foreach ($this->resource['results'] as $attributes) {
             $data['results'][] = Planet::create($attributes);
         }
-
-        $data['additional_page_info'] = $this->additionalPageInfo();
 
         return collect($data);
     }

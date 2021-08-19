@@ -14,7 +14,8 @@ class BaseRepository
     protected const BASE_URL_API = 'https://swapi.dev/api';
 
     protected array $resource = [];
-    private array $paginationParameters = [];
+    private array $pagingParameters = [];
+    private array $filteringParameters = [];
 
     public function additionalPageInfo(): array
     {
@@ -23,18 +24,10 @@ class BaseRepository
         ];
     }
 
-    protected function setPaginationParameters($paginationParameters): void
+    protected function fillParameters($parameters)
     {
-        $this->paginationParameters = $paginationParameters ?? [];
-    }
-
-    protected function getPaginationNumber()
-    {
-        if (isset($this->paginationParameters['number'])) {
-            return $this->paginationParameters['number'];
-        }
-
-        return null;
+        $this->setPagingParameters($parameters['page']);
+        $this->setFilteringParameters($parameters['filter']);
     }
 
     /**
@@ -58,6 +51,34 @@ class BaseRepository
         return json_decode($data, true);
     }
 
+    private function getPagingNumber(): ?string
+    {
+        if (isset($this->pagingParameters['number'])) {
+            return $this->pagingParameters['number'];
+        }
+
+        return null;
+    }
+
+    private function setPagingParameters($pagingParameters): void
+    {
+        $this->pagingParameters = $pagingParameters ?? [];
+    }
+
+    private function getFilteringValue(): ?string
+    {
+        if (isset($this->filteringParameters)) {
+            return reset($this->filteringParameters);
+        }
+
+        return null;
+    }
+
+    private function setFilteringParameters($filteringParameters): void
+    {
+        $this->filteringParameters = $filteringParameters ?? [];
+    }
+
     private function getUriApi(int $id = null): string
     {
         $urlApiArr = [
@@ -72,7 +93,8 @@ class BaseRepository
     private function getQueryApi(): array
     {
         return [
-            'page' => $this->getPaginationNumber()
+            'search' => $this->getFilteringValue(),
+            'page' => $this->getPagingNumber()
         ];
     }
 }

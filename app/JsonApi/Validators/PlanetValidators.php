@@ -2,19 +2,12 @@
 
 namespace App\JsonApi\Validators;
 
-use CloudCreativity\LaravelJsonApi\Validation\AbstractValidators;
-
-class PlanetValidators extends AbstractValidators
+class PlanetValidators extends AbstractBaseValidators
 {
     protected $allowedIncludePaths = ['people'];
     protected $allowedPagingParameters = ['number', 'size'];
     protected $allowedFilteringParameters = ['name'];
     protected $allowedSortParameters = [];
-
-    protected function rules($record, array $data): array
-    {
-        return [];
-    }
 
     protected function queryRules(): array
     {
