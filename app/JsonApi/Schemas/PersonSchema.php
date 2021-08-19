@@ -2,6 +2,8 @@
 
 namespace App\JsonApi\Schemas;
 
+use App\Models\Film;
+use App\Models\FilmRepository;
 use App\Models\People;
 use App\Models\Planet;
 
@@ -25,10 +27,12 @@ class PersonSchema extends AbstractBaseSchema
         'edited',
         // Relationship
         'homeworld',
+        'films'
     ];
 
     protected array $relationships = [
         'planet',
+        'films'
     ];
 
     /**
@@ -50,6 +54,7 @@ class PersonSchema extends AbstractBaseSchema
             'edited' => $resource->getEdited(),
             // Relationship
             'homeworld' => $resource->getHomeworld(),
+            'films' => $resource->getFilms(),
         ];
     }
 
@@ -66,6 +71,29 @@ class PersonSchema extends AbstractBaseSchema
                     $planet->setId($homeworldData['id']);
 
                     return $planet;
+                }
+            ],
+            'films' => [
+                self::SHOW_SELF => $isPrimary,
+                self::SHOW_RELATED => $isPrimary,
+                self::SHOW_DATA => isset($includeRelationships['films']) || !$isPrimary,
+                self::DATA => function () use ($resource) {
+                    $films = $resource->getFilms();
+                    if (is_null($films)) {
+                        $filmRepository = new FilmRepository();
+                        $film = $filmRepository->find($resource->getId());
+                        $films = $film->getCharacters();
+                    }
+
+                    $filmList = [];
+
+                    foreach ($films as $film) {
+                        $people = new Film();
+                        $people->setId($film['id']);
+                        $filmList[] = $people;
+                    }
+
+                    return $filmList;
                 }
             ]
         ];

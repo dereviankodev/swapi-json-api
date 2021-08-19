@@ -2,9 +2,9 @@
 
 namespace App\JsonApi\Validators;
 
-class PersonValidators extends AbstractBaseValidators
+class FilmValidators extends AbstractBaseValidators
 {
-    protected $allowedIncludePaths = ['planet', 'films'];
+    protected $allowedIncludePaths = ['people'];
     protected $allowedPagingParameters = ['number', 'size'];
     protected $allowedFilteringParameters = ['name'];
     protected $allowedSortParameters = [];

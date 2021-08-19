@@ -30,6 +30,7 @@ use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
  * @method void setUrl(string $url)
  *
  * @method array getHomeworld()
+ * @method array getFilms()
  */
 class People extends BaseModel
 {
@@ -51,6 +52,7 @@ class People extends BaseModel
         $people->setUrl($attributes['url']);
         // Relationship
         $people->setHomeworld($attributes['homeworld']);
+        $people->setFilms($attributes['films']);
 
         return $people;
     }
@@ -69,6 +71,27 @@ class People extends BaseModel
         $this->setAttribute('homeworld', $homeworld);
     }
 
+    public function setFilms(array $films): void
+    {
+        $filmList = [];
+        foreach ($films as $film) {
+            if (is_array($film)) {
+                $filmList[] = $films;
+                break;
+            }
+
+            $urlPath = parse_url($film, PHP_URL_PATH);
+            $explodeUrlPath = explode('/', trim($urlPath, '/'));
+            $filmData = [
+                'type' => $explodeUrlPath[1],
+                'id' => $explodeUrlPath[2],
+            ];
+            $filmList[] = $filmData;
+        }
+
+        $this->setAttribute('films', $filmList);
+    }
+
     /**
      * @throws JsonApiException
      */
@@ -83,6 +106,23 @@ class People extends BaseModel
         }
 
         return null;
+    }
+
+    /**
+     * @throws JsonApiException
+     */
+    public function characters(): array
+    {
+        $people = $this->getFilms();
+        $relations = null;
+
+        foreach ($people as $person) {
+            $peopleRepository = new PeopleRepository();
+            $attributes = $peopleRepository->find($person['id'])->getAttributes();
+            $relations[] = People::create($attributes);
+        }
+
+        return $relations;
     }
 
     public function relationLoaded($arguments): bool

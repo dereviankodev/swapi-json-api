@@ -21,4 +21,9 @@ class PersonAdapter extends AbstractBaseAdapter
     {
         return new GenericRelation();
     }
+
+    protected function films()
+    {
+        return new GenericRelation();
+    }
 }
