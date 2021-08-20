@@ -47,7 +47,7 @@ class BaseModel
         return false;
     }
 
-    protected function getHasOne($classModel, $classRepository, array $relatedData, bool $simple): object|array|null
+    protected function getHasOne($classModel, $classRepository, array|null $relatedData, bool $simple): object|array|null
     {
         if ($simple) {
             return $this->getSimpleData($classModel, $relatedData);
@@ -65,9 +65,9 @@ class BaseModel
         return $this->getFullDataList($classModel, $classRepository, $relatedData);
     }
 
-    protected function getParsedData($data): array
+    protected function getParsedData($data): ?array
     {
-        if (is_array($data)) {
+        if (is_array($data) || is_null($data)) {
             return $data;
         }
 
@@ -103,6 +103,10 @@ class BaseModel
 
     private function getSimpleData($classModel, $relatedData)
     {
+        if (is_null($relatedData)) {
+            return null;
+        }
+
         $object = new $classModel();
         $object->setId($relatedData['id']);
 

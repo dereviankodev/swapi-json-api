@@ -27,10 +27,22 @@ JsonApi::register('v1')->routes(function (Api $api) {
     // Planets
     $api->resource('planets')->relationships(function ($relations) {
         $relations->hasMany('people');
+        $relations->hasMany('films');
     });
 
     // Films
     $api->resource('films')->relationships(function ($relations) {
         $relations->hasMany('people');
+        $relations->hasMany('planet');
+        $relations->hasMany('species');
+        $relations->hasMany('starships');
+        $relations->hasMany('vehicles');
+    });
+
+    // Species
+    $api->resource('species')->relationships(function ($relations) {
+        $relations->hasOne('planet');
+        $relations->hasMany('people');
+        $relations->hasMany('films');
     });
 });
