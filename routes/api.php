@@ -19,18 +19,18 @@ JsonApi::register('v1')->routes(function (Api $api) {
     $api->resource('people')->relationships(function ($relations) {
         $relations->hasOne('planet');
         $relations->hasMany('films');
-//        $relations->hasMany('species');
-//        $relations->hasMany('starships');
-//        $relations->hasMany('vehicles');
+        $relations->hasMany('species');
+        $relations->hasMany('starships');
+        $relations->hasMany('vehicles');
     });
 
     // Planets
-    $api->resource('planets', [
-        'has-many' => 'people'
-    ]);
+    $api->resource('planets')->relationships(function ($relations) {
+        $relations->hasMany('people');
+    });
 
     // Films
-    $api->resource('films', [
-        'has-many' => 'people'
-    ]);
+    $api->resource('films')->relationships(function ($relations) {
+        $relations->hasMany('people');
+    });
 });

@@ -3,8 +3,6 @@
 namespace App\JsonApi\Schemas;
 
 use App\Models\Film;
-use App\Models\FilmRepository;
-use App\Models\People;
 
 class FilmSchema extends AbstractBaseSchema
 {
@@ -24,10 +22,18 @@ class FilmSchema extends AbstractBaseSchema
         'edited',
         // Relationship
         'characters',
+        'planets',
+        'species',
+        'starships',
+        'vehicles',
     ];
 
     protected array $relationships = [
         'people',
+        'planets',
+        'species',
+        'starships',
+        'vehicles',
     ];
 
     /**
@@ -47,6 +53,10 @@ class FilmSchema extends AbstractBaseSchema
             'edited' => $resource->getEdited(),
             // Relationship
             'characters' => $resource->getCharacters(),
+            'planets' => $resource->getPlanets(),
+            'species' => $resource->getSpecies(),
+            'starships' => $resource->getStarships(),
+            'vehicles' => $resource->getVehicles(),
         ];
     }
 
@@ -54,27 +64,45 @@ class FilmSchema extends AbstractBaseSchema
     {
         return [
             'people' => [
-                self::SHOW_SELF => $isPrimary,
-                self::SHOW_RELATED => $isPrimary,
-                self::SHOW_DATA => isset($includeRelationships['people']) || !$isPrimary,
+                self::SHOW_SELF => true,
+                self::SHOW_RELATED => true,
+                self::SHOW_DATA => isset($includeRelationships['people']),
                 self::DATA => function () use ($resource) {
-                    $residents = $resource->getfilms();
-                    if (is_null($residents)) {
-                        $planetRepository = new FilmRepository();
-                        $planet = $planetRepository->find($resource->getId());
-                        $residents = $planet->getCharacters();
-                    }
-                    $residentList = [];
-
-                    foreach ($residents as $resident) {
-                        $people = new People();
-                        $people->setId($resident['id']);
-                        $residentList[] = $people;
-                    }
-
-                    return $residentList;
+                    return $resource->people(true);
                 }
-            ]
+            ],
+            'planets' => [
+                self::SHOW_SELF => true,
+                self::SHOW_RELATED => true,
+                self::SHOW_DATA => isset($includeRelationships['planets']),
+                self::DATA => function () use ($resource) {
+                    return $resource->planets(true);
+                }
+            ],
+            'species' => [
+                self::SHOW_SELF => true,
+                self::SHOW_RELATED => true,
+                self::SHOW_DATA => isset($includeRelationships['species']),
+                self::DATA => function () use ($resource) {
+                    return $resource->species(true);
+                }
+            ],
+            'starships' => [
+                self::SHOW_SELF => true,
+                self::SHOW_RELATED => true,
+                self::SHOW_DATA => isset($includeRelationships['starships']),
+                self::DATA => function () use ($resource) {
+                    return $resource->starships(true);
+                }
+            ],
+            'vehicles' => [
+                self::SHOW_SELF => true,
+                self::SHOW_RELATED => true,
+                self::SHOW_DATA => isset($includeRelationships['vehicles']),
+                self::DATA => function () use ($resource) {
+                    return $resource->vehicles(true);
+                }
+            ],
         ];
     }
 }

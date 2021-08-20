@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
-
 /**
  * @method int getId()
  * @method string getName()
@@ -29,8 +27,11 @@ use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
  * @method string getUrl()
  * @method void setUrl(string $url)
  *
- * @method array getHomeworld()
- * @method array getFilms()
+ * @method array getHomeworld() Has one
+ * @method array getFilms() Has many
+ * @method array getSpecies() Has many
+ * @method array getStarships() Has many
+ * @method array getVehicles() Has many
  */
 class People extends BaseModel
 {
@@ -50,89 +51,78 @@ class People extends BaseModel
         $people->setCreated($attributes['created']);
         $people->setEdited($attributes['edited']);
         $people->setUrl($attributes['url']);
+
         // Relationship
         $people->setHomeworld($attributes['homeworld']);
         $people->setFilms($attributes['films']);
+        $people->setSpecies($attributes['species']);
+        $people->setStarships($attributes['starships']);
+        $people->setVehicles($attributes['vehicles']);
 
         return $people;
     }
 
-    public function setHomeworld(mixed $homeworld): void
-    {
-        if (!is_array($homeworld)) {
-            $urlPath = parse_url($homeworld, PHP_URL_PATH);
-            $explodeUrlPath = explode('/', trim($urlPath, '/'));
-            $homeworld = [
-                'type' => $explodeUrlPath[1],
-                'id' => $explodeUrlPath[2]
-            ];
-        }
+    // Relation Mutators
 
-        $this->setAttribute('homeworld', $homeworld);
+    public function setHomeworld(mixed $data): void
+    {
+        $this->setAttribute('homeworld', $this->getParsedData($data));
     }
 
-    public function setFilms(array $films): void
+    public function setFilms(array $dataList): void
     {
-        $filmList = [];
-        foreach ($films as $film) {
-            if (is_array($film)) {
-                $filmList[] = $films;
-                break;
-            }
-
-            $urlPath = parse_url($film, PHP_URL_PATH);
-            $explodeUrlPath = explode('/', trim($urlPath, '/'));
-            $filmData = [
-                'type' => $explodeUrlPath[1],
-                'id' => $explodeUrlPath[2],
-            ];
-            $filmList[] = $filmData;
-        }
-
-        $this->setAttribute('films', $filmList);
+        $this->setAttribute('films', $this->getParsedDataList($dataList));
     }
 
-    /**
-     * @throws JsonApiException
-     */
-    public function planet(): ?Planet
+    public function setSpecies(array $dataList): void
     {
-        $planet = $this->getHomeworld();
-        $planetRepository = new PlanetRepository();
-        $attributes = $planetRepository->find($planet['id'])->getAttributes();
-
-        if ($relation = Planet::create($attributes)) {
-            return $relation;
-        }
-
-        return null;
+        $this->setAttribute('species', $this->getParsedDataList($dataList));
     }
 
-    /**
-     * @throws JsonApiException
-     */
-    public function characters(): array
+    public function setStarships(array $dataList): void
     {
-        $people = $this->getFilms();
-        $relations = null;
+        $this->setAttribute('starships', $this->getParsedDataList($dataList));
+    }
 
-        foreach ($people as $person) {
-            $peopleRepository = new PeopleRepository();
-            $attributes = $peopleRepository->find($person['id'])->getAttributes();
-            $relations[] = People::create($attributes);
-        }
+    public function setVehicles(array $dataList): void
+    {
+        $this->setAttribute('vehicles', $this->getParsedDataList($dataList));
+    }
 
-        return $relations;
+    // Relationship data
+
+    public function planet(bool $simple = false): object|array|null
+    {
+        $relatedData = $this->getHomeworld();
+        return $this->getHasOne(Planet::class, PlanetRepository::class, $relatedData, $simple);
+    }
+
+    public function films(bool $simple = false): ?array
+    {
+        $relatedData = $this->getFilms();
+        return $this->getHasMany(Film::class, FilmRepository::class, $relatedData, $simple);
+    }
+
+    public function species(bool $simple = false): ?array
+    {
+        $relatedData = $this->getSpecies();
+        return $this->getHasMany(Species::class, SpeciesRepository::class, $relatedData, $simple);
+    }
+
+    public function starships(bool $simple = false): ?array
+    {
+        $relatedData = $this->getStarships();
+        return $this->getHasMany(Starship::class, StarshipRepository::class, $relatedData, $simple);
+    }
+
+    public function vehicles(bool $simple = false): ?array
+    {
+        $relatedData = $this->getVehicles();
+        return $this->getHasMany(Vehicle::class, VehicleRepository::class, $relatedData, $simple);
     }
 
     public function relationLoaded($arguments): bool
     {
-        if (!array_key_exists($arguments, $this->relations)) {
-            $peopleRepository = new PeopleRepository();
-            $id = $this->getId();
-            return $this->relationLoad($peopleRepository, $id);
-        }
-
-        return true;
+        return array_key_exists($arguments, $this->relations) || $this->relationLoad(new PeopleRepository(), $this->getId());
     }
 }

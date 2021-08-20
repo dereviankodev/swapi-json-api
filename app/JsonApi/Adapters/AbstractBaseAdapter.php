@@ -46,6 +46,9 @@ abstract class AbstractBaseAdapter extends AbstractResourceAdapter
         return $this->repository->find($resourceId);
     }
 
+    /**
+     * @throws JsonApiException
+     */
     public function exists(string $resourceId): bool
     {
         return !is_null($this->find($resourceId));

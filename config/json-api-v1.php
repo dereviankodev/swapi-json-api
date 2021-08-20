@@ -69,9 +69,9 @@ return [
         'people' => App\Models\People::class,
         'planets' => App\Models\Planet::class,
         'films' => App\Models\Film::class,
-//        'species' => App\Models\Space::class,
-//        'starships' => App\Models\Starship::class,
-//        'vehicles' => App\Models\Vehicle::class,
+        'species' => App\Models\Species::class,
+        'starships' => App\Models\Starship::class,
+        'vehicles' => App\Models\Vehicle::class,
     ],
 
     /*

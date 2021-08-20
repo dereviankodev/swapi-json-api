@@ -2,9 +2,7 @@
 
 namespace App\JsonApi\Schemas;
 
-use App\Models\People;
 use App\Models\Planet;
-use App\Models\PlanetRepository;
 
 class PlanetSchema extends AbstractBaseSchema
 {
@@ -27,10 +25,12 @@ class PlanetSchema extends AbstractBaseSchema
         'edited',
         // Relationship
         'residents',
+        'films',
     ];
 
     protected array $relationships = [
         'people',
+        'films',
     ];
 
     /**
@@ -53,6 +53,7 @@ class PlanetSchema extends AbstractBaseSchema
             'edited' => $resource->getEdited(),
             // Relationship
             'residents' => $resource->getResidents(),
+            'films' => $resource->getFilms(),
         ];
     }
 
@@ -60,27 +61,21 @@ class PlanetSchema extends AbstractBaseSchema
     {
         return [
             'people' => [
-                self::SHOW_SELF => $isPrimary,
-                self::SHOW_RELATED => $isPrimary,
-                self::SHOW_DATA => isset($includeRelationships['people']) || !$isPrimary,
+                self::SHOW_SELF => true,
+                self::SHOW_RELATED => true,
+                self::SHOW_DATA => isset($includeRelationships['people']),
                 self::DATA => function () use ($resource) {
-                    $residents = $resource->getResidents();
-                    if (is_null($residents)) {
-                        $planetRepository = new PlanetRepository();
-                        $planet = $planetRepository->find($resource->getId());
-                        $residents = $planet->getResidents();
-                    }
-                    $residentList = [];
-
-                    foreach ($residents as $resident) {
-                        $people = new People();
-                        $people->setId($resident['id']);
-                        $residentList[] = $people;
-                    }
-
-                    return $residentList;
+                    return $resource->people(true);
                 }
-            ]
+            ],
+            'films' => [
+                self::SHOW_SELF => true,
+                self::SHOW_RELATED => true,
+                self::SHOW_DATA => isset($includeRelationships['films']),
+                self::DATA => function () use ($resource) {
+                    return $resource->films(true);
+                }
+            ],
         ];
     }
 }

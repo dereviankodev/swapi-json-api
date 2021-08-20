@@ -26,4 +26,19 @@ class PersonAdapter extends AbstractBaseAdapter
     {
         return new GenericRelation();
     }
+
+    protected function species()
+    {
+        return new GenericRelation();
+    }
+
+    protected function starships()
+    {
+        return new GenericRelation();
+    }
+
+    protected function vehicles()
+    {
+        return new GenericRelation();
+    }
 }

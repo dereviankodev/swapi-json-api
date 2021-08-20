@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
-
 /**
  * @method int getId()
  * @method string getName()
@@ -31,7 +29,8 @@ use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
  * @method string getUrl()
  * @method void setUrl(string $url)
  *
- * @method array getResidents()
+ * @method array getResidents() Has many
+ * @method array getFilms() Has many
  */
 class Planet extends BaseModel
 {
@@ -52,58 +51,42 @@ class Planet extends BaseModel
         $planet->setCreated($attributes['created']);
         $planet->setEdited($attributes['edited']);
         $planet->setUrl($attributes['url']);
+
         // Relationship
         $planet->setResidents($attributes['residents']);
+        $planet->setFilms($attributes['films']);
 
         return $planet;
     }
 
-    public function setResidents(array $residents): void
+    // Relation Mutators
+
+    public function setResidents(array $dataList): void
     {
-        $residentList = [];
-        foreach ($residents as $resident) {
-            if (is_array($resident)) {
-                $residentList[] = $residents;
-                break;
-            }
-
-            $urlPath = parse_url($resident, PHP_URL_PATH);
-            $explodeUrlPath = explode('/', trim($urlPath, '/'));
-            $residentData = [
-                'type' => $explodeUrlPath[1],
-                'id' => $explodeUrlPath[2],
-            ];
-            $residentList[] = $residentData;
-        }
-
-        $this->setAttribute('residents', $residentList);
+        $this->setAttribute('residents', $this->getParsedDataList($dataList));
     }
 
-    /**
-     * @throws JsonApiException
-     */
-    public function people(): array
+    public function setFilms(array $dataList): void
     {
-        $people = $this->getResidents();
-        $relations = null;
+        $this->setAttribute('films', $this->getParsedDataList($dataList));
+    }
 
-        foreach ($people as $person) {
-            $peopleRepository = new PeopleRepository();
-            $attributes = $peopleRepository->find($person['id'])->getAttributes();
-            $relations[] = People::create($attributes);
-        }
+    // Relationship data
 
-        return $relations;
+    public function people(bool $simple = false): ?array
+    {
+        $relatedData = $this->getResidents();
+        return $this->getHasMany(People::class, PeopleRepository::class, $relatedData, $simple);
+    }
+
+    public function films(bool $simple = false): ?array
+    {
+        $relatedData = $this->getFilms();
+        return $this->getHasMany(Film::class, FilmRepository::class, $relatedData, $simple);
     }
 
     public function relationLoaded($arguments): bool
     {
-        if (!array_key_exists($arguments, $this->relations)) {
-            $peopleRepository = new PlanetRepository();
-            $id = $this->getId();
-            return $this->relationLoad($peopleRepository, $id);
-        }
-
-        return true;
+        return array_key_exists($arguments, $this->relations) || $this->relationLoad(new PlanetRepository(), $this->getId());
     }
 }

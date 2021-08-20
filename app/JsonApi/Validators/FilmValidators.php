@@ -4,9 +4,9 @@ namespace App\JsonApi\Validators;
 
 class FilmValidators extends AbstractBaseValidators
 {
-    protected $allowedIncludePaths = ['people'];
+    protected $allowedIncludePaths = ['people', 'planets', 'species', 'starships', 'vehicles'];
     protected $allowedPagingParameters = ['number', 'size'];
-    protected $allowedFilteringParameters = ['name'];
+    protected $allowedFilteringParameters = ['title'];
     protected $allowedSortParameters = [];
 
     protected function queryRules(): array
@@ -14,7 +14,7 @@ class FilmValidators extends AbstractBaseValidators
         return [
             'page.number' => 'filled|numeric|min:1,',
             'page.size' => 'filled|numeric|',
-            'filter.name' => 'filled|string'
+            'filter.title' => 'filled|string'
         ];
     }
 }

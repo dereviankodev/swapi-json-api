@@ -4,7 +4,7 @@ namespace App\JsonApi\Validators;
 
 class PlanetValidators extends AbstractBaseValidators
 {
-    protected $allowedIncludePaths = ['people'];
+    protected $allowedIncludePaths = ['people', 'films'];
     protected $allowedPagingParameters = ['number', 'size'];
     protected $allowedFilteringParameters = ['name'];
     protected $allowedSortParameters = [];

@@ -2,13 +2,11 @@
 
 namespace App\Models;
 
-use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
-
 /**
  * @method int getId()
  * @method string getTitle()
  * @method void setTitle(string $title)
- * @method string getEpisodeId()
+ * @method int getEpisodeId()
  * @method void setEpisodeId(int $episode_id)
  * @method string getOpeningCrawl()
  * @method void setOpeningCrawl(string $opening_crawl)
@@ -25,7 +23,11 @@ use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
  * @method string getUrl()
  * @method void setUrl(string $url)
  *
- * @method array getCharacters()
+ * @method array getCharacters() Has one
+ * @method array getPlanets() Has one
+ * @method array getSpecies() Has many
+ * @method array getStarships() Has many
+ * @method array getVehicles() Has many
  */
 class Film extends BaseModel
 {
@@ -43,41 +45,78 @@ class Film extends BaseModel
         $people->setCreated($attributes['created']);
         $people->setEdited($attributes['edited']);
         $people->setUrl($attributes['url']);
+
         // Relationship
         $people->setCharacters($attributes['characters']);
+        $people->setPlanets($attributes['planets']);
+        $people->setSpecies($attributes['species']);
+        $people->setStarships($attributes['starships']);
+        $people->setVehicles($attributes['vehicles']);
 
         return $people;
     }
 
-    public function setCharacters(array $characters): void
+    // Relation Mutators
+
+    public function setCharacters(array $dataList): void
     {
-        $characterList = [];
-        foreach ($characters as $character) {
-            if (is_array($character)) {
-                $characterList[] = $characters;
-                break;
-            }
+        $this->setAttribute('characters', $this->getParsedDataList($dataList));
+    }
 
-            $urlPath = parse_url($character, PHP_URL_PATH);
-            $explodeUrlPath = explode('/', trim($urlPath, '/'));
-            $characterData = [
-                'type' => $explodeUrlPath[1],
-                'id' => $explodeUrlPath[2],
-            ];
-            $characterList[] = $characterData;
-        }
+    public function setPlanets(array $dataList): void
+    {
+        $this->setAttribute('planets', $this->getParsedDataList($dataList));
+    }
 
-        $this->setAttribute('characters', $characterList);
+    public function setSpecies(array $dataList): void
+    {
+        $this->setAttribute('species', $this->getParsedDataList($dataList));
+    }
+
+    public function setStarships(array $dataList): void
+    {
+        $this->setAttribute('starships', $this->getParsedDataList($dataList));
+    }
+
+    public function setVehicles(array $dataList): void
+    {
+        $this->setAttribute('vehicles', $this->getParsedDataList($dataList));
+    }
+
+    // Relationship data
+
+    public function people(bool $simple = false): ?array
+    {
+        $relatedData = $this->getCharacters();
+        return $this->getHasMany(People::class, PeopleRepository::class, $relatedData, $simple);
+    }
+
+    public function planets(bool $simple = false): object|array|null
+    {
+        $relatedData = $this->getPlanets();
+        return $this->getHasMany(Planet::class, PlanetRepository::class, $relatedData, $simple);
+    }
+
+    public function species(bool $simple = false): ?array
+    {
+        $relatedData = $this->getSpecies();
+        return $this->getHasMany(Species::class, SpeciesRepository::class, $relatedData, $simple);
+    }
+
+    public function starships(bool $simple = false): ?array
+    {
+        $relatedData = $this->getStarships();
+        return $this->getHasMany(Starship::class, StarshipRepository::class, $relatedData, $simple);
+    }
+
+    public function vehicles(bool $simple = false): ?array
+    {
+        $relatedData = $this->getVehicles();
+        return $this->getHasMany(Vehicle::class, VehicleRepository::class, $relatedData, $simple);
     }
 
     public function relationLoaded($arguments): bool
     {
-        if (!array_key_exists($arguments, $this->relations)) {
-            $peopleRepository = new FilmRepository();
-            $id = $this->getId();
-            return $this->relationLoad($peopleRepository, $id);
-        }
-
-        return true;
+        return array_key_exists($arguments, $this->relations) || $this->relationLoad(new FilmRepository(), $this->getId());
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\Cache\CacheService;
 use CloudCreativity\LaravelJsonApi\Document\Error\Error;
 use CloudCreativity\LaravelJsonApi\Exceptions\JsonApiException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class BaseRepository
@@ -24,10 +25,39 @@ class BaseRepository
         ];
     }
 
-    protected function fillParameters($parameters)
+    /**
+     * @throws JsonApiException
+     */
+    protected function getAll($className, $parameters): array
     {
-        $this->setPagingParameters($parameters['page']);
-        $this->setFilteringParameters($parameters['filter']);
+        $this->fillParameters($parameters);
+
+        if (empty($this->resource)) {
+            $cacheKey = request()->fullUrl();
+            $this->getDataIntoResource($cacheKey);
+        }
+
+        $data = [
+            'results' => null,
+            'additional_page_info' => $this->additionalPageInfo()
+        ];
+
+        foreach ($this->resource['results'] as $attributes) {
+            $data['results'][] = $className::create($attributes);
+        }
+
+        return $data;
+    }
+
+    /**
+     * @throws JsonApiException
+     */
+    protected function getOne($className, $resourceId)
+    {
+        $cacheKey = request()->fullUrl() . '|' . $resourceId . '|' . $className;
+        $this->getDataIntoResource($cacheKey, $resourceId);
+
+        return $className::create($this->resource);
     }
 
     /**
@@ -49,6 +79,25 @@ class BaseRepository
         }
 
         return json_decode($data, true);
+    }
+
+    protected function fillParameters($parameters)
+    {
+        $this->setPagingParameters($parameters['page']);
+        $this->setFilteringParameters($parameters['filter']);
+    }
+
+    /**
+     * @throws JsonApiException
+     */
+    private function getDataIntoResource($cacheKey, int $resourceId = null): void
+    {
+        if ($this->isCached($cacheKey)) {
+            $this->resource = Cache::get($cacheKey);
+        } else {
+            $this->resource = $this->load($resourceId);
+            $this->putDataIntoCache($cacheKey, $this->resource);
+        }
     }
 
     private function getPagingNumber(): ?string

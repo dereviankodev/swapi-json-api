@@ -2,10 +2,7 @@
 
 namespace App\JsonApi\Schemas;
 
-use App\Models\Film;
-use App\Models\FilmRepository;
 use App\Models\People;
-use App\Models\Planet;
 
 class PersonSchema extends AbstractBaseSchema
 {
@@ -27,12 +24,18 @@ class PersonSchema extends AbstractBaseSchema
         'edited',
         // Relationship
         'homeworld',
-        'films'
+        'films',
+        'species',
+        'starships',
+        'vehicles',
     ];
 
     protected array $relationships = [
         'planet',
-        'films'
+        'films',
+        'species',
+        'starships',
+        'vehicles',
     ];
 
     /**
@@ -55,6 +58,9 @@ class PersonSchema extends AbstractBaseSchema
             // Relationship
             'homeworld' => $resource->getHomeworld(),
             'films' => $resource->getFilms(),
+            'species' => $resource->getSpecies(),
+            'starships' => $resource->getStarships(),
+            'vehicles' => $resource->getVehicles(),
         ];
     }
 
@@ -62,40 +68,45 @@ class PersonSchema extends AbstractBaseSchema
     {
         return [
             'planet' => [
-                self::SHOW_SELF => $isPrimary,
-                self::SHOW_RELATED => $isPrimary,
-                self::SHOW_DATA => isset($includeRelationships['planet']) || !$isPrimary,
+                self::SHOW_SELF => true,
+                self::SHOW_RELATED => true,
+                self::SHOW_DATA => isset($includeRelationships['planet']),
                 self::DATA => function () use ($resource) {
-                    $homeworldData = $resource->getHomeworld();
-                    $planet = new Planet();
-                    $planet->setId($homeworldData['id']);
-
-                    return $planet;
+                    return $resource->planet(true);
                 }
             ],
             'films' => [
-                self::SHOW_SELF => $isPrimary,
-                self::SHOW_RELATED => $isPrimary,
-                self::SHOW_DATA => isset($includeRelationships['films']) || !$isPrimary,
+                self::SHOW_SELF => true,
+                self::SHOW_RELATED => true,
+                self::SHOW_DATA => isset($includeRelationships['films']),
                 self::DATA => function () use ($resource) {
-                    $films = $resource->getFilms();
-                    if (is_null($films)) {
-                        $filmRepository = new FilmRepository();
-                        $film = $filmRepository->find($resource->getId());
-                        $films = $film->getCharacters();
-                    }
-
-                    $filmList = [];
-
-                    foreach ($films as $film) {
-                        $people = new Film();
-                        $people->setId($film['id']);
-                        $filmList[] = $people;
-                    }
-
-                    return $filmList;
+                    return $resource->films(true);
                 }
-            ]
+            ],
+            'species' => [
+                self::SHOW_SELF => true,
+                self::SHOW_RELATED => true,
+                self::SHOW_DATA => isset($includeRelationships['species']),
+                self::DATA => function () use ($resource) {
+                    return $resource->species(true);
+                }
+            ],
+            'starships' => [
+                self::SHOW_SELF => true,
+                self::SHOW_RELATED => true,
+                self::SHOW_DATA => isset($includeRelationships['starships']),
+                self::DATA => function () use ($resource) {
+                    return $resource->starships(true);
+                }
+            ],
+            'vehicles' => [
+                self::SHOW_SELF => true,
+                self::SHOW_RELATED => true,
+                self::SHOW_DATA => isset($includeRelationships['vehicles']),
+                self::DATA => function () use ($resource) {
+                    return $resource->vehicles(true);
+                }
+            ],
         ];
     }
 }
