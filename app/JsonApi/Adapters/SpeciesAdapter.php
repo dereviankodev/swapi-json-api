@@ -17,17 +17,17 @@ class SpeciesAdapter extends AbstractBaseAdapter
         $this->paging = $paging;
     }
 
-    protected function planet()
+    protected function planet(): GenericRelation
     {
         return new GenericRelation();
     }
 
-    protected function people()
+    protected function people(): GenericRelation
     {
         return new GenericRelation();
     }
 
-    protected function films()
+    protected function films(): GenericRelation
     {
         return new GenericRelation();
     }

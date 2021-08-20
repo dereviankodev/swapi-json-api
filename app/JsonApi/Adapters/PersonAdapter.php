@@ -17,27 +17,27 @@ class PersonAdapter extends AbstractBaseAdapter
         $this->paging = $paging;
     }
 
-    protected function planet()
+    protected function planet(): GenericRelation
     {
         return new GenericRelation();
     }
 
-    protected function films()
+    protected function films(): GenericRelation
     {
         return new GenericRelation();
     }
 
-    protected function species()
+    protected function species(): GenericRelation
     {
         return new GenericRelation();
     }
 
-    protected function starships()
+    protected function starships(): GenericRelation
     {
         return new GenericRelation();
     }
 
-    protected function vehicles()
+    protected function vehicles(): GenericRelation
     {
         return new GenericRelation();
     }

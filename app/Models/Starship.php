@@ -57,7 +57,7 @@ class Starship extends BaseModel
         $planet->setPassengers($attributes['passengers']);
         $planet->setMaxAtmospheringSpeed($attributes['max_atmosphering_speed']);
         $planet->setHyperdriveRating($attributes['hyperdrive_rating']);
-        $planet->setMGLT($attributes['MGLT']);
+        $planet->setMGLT($attributes['MGLT'] ?? $attributes['m_g_l_t']);
         $planet->setCargoCapacity($attributes['cargo_capacity']);
         $planet->setConsumables($attributes['consumables']);
         $planet->setCreated($attributes['created']);

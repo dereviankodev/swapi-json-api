@@ -17,12 +17,12 @@ class StarshipAdapter extends AbstractBaseAdapter
         $this->paging = $paging;
     }
 
-    protected function people()
+    protected function people(): GenericRelation
     {
         return new GenericRelation();
     }
 
-    protected function films()
+    protected function films(): GenericRelation
     {
         return new GenericRelation();
     }
