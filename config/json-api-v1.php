@@ -1,5 +1,8 @@
 <?php
 
+use CloudCreativity\LaravelJsonApi\Queue\ClientJob;
+use CloudCreativity\LaravelJsonApi\Resolver\ResolverFactory;
+
 return [
 
     /*
@@ -12,7 +15,7 @@ return [
     | resource types. We recommend using our default implementation but you
     | can override it here if desired.
     */
-    'resolver' => \CloudCreativity\LaravelJsonApi\Resolver\ResolverFactory::class,
+    'resolver' => ResolverFactory::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -142,7 +145,7 @@ return [
     */
     'jobs' => [
         'resource' => 'queue-jobs',
-        'model' => \CloudCreativity\LaravelJsonApi\Queue\ClientJob::class,
+        'model' => ClientJob::class,
     ],
 
     /*

@@ -45,4 +45,10 @@ JsonApi::register('v1')->routes(function (Api $api) {
         $relations->hasMany('people');
         $relations->hasMany('films');
     });
+
+    // Starships
+    $api->resource('starships')->relationships(function ($relations) {
+        $relations->hasMany('people');
+        $relations->hasMany('films');
+    });
 });
