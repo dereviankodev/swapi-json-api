@@ -9,8 +9,10 @@
         "cloudcreativity/laravel-json-api": "^3.3",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
+        "guzzlehttp/psr7": "2",
         "laravel/framework": "^8.54",
-        "laravel/tinker": "^2.5"
+        "laravel/tinker": "^2.5",
+        "westacks/telebot": "^1.12"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.6",

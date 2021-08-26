@@ -1,8 +1,7 @@
 <?php
 
-use Monolog\Handler\NullHandler;
-use Monolog\Handler\StreamHandler;
-use Monolog\Handler\SyslogUdpHandler;
+use Monolog\Handler\{NullHandler,StreamHandler,SyslogUdpHandler};
+use WeStacks\TeleBot\Laravel\Log\TelegramLogger;
 
 return [
 
@@ -99,6 +98,14 @@ return [
 
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
+        ],
+
+        'telegram' => [
+            'driver'    => 'custom',
+            'via'       => TelegramLogger::class,
+            'level'     => 'debug',
+            'bot'       => 'bot',
+            'chat_id'   => env('TELEGRAM_LOG_CHAT_ID') // Any chat where bot can write messages.
         ],
     ],
 
