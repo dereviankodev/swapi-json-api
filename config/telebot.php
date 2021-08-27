@@ -46,6 +46,7 @@ return [
             ],
 
             'handlers' => [
+                \App\Services\Telegram\Handlers\CommandsHandler::class,
                 \App\Services\Telegram\Commands\StartCommand::class,
                 \App\Services\Telegram\Commands\PeopleCommand::class,
             ],

@@ -2,18 +2,20 @@
 
 namespace App\Services\Telegram\Handlers;
 
-use WeStacks\TeleBot\Interfaces\UpdateHandler as BaseUpdateHandler;
+use WeStacks\TeleBot\Interfaces\UpdateHandler;
 use WeStacks\TeleBot\Objects\Update;
 use WeStacks\TeleBot\TeleBot;
 
-class UpdateHandler extends BaseUpdateHandler
+class CommandsHandler extends UpdateHandler
 {
     /**
      * @inheritDoc
      */
     public static function trigger(Update $update, TeleBot $bot): bool
     {
-        return isset($update->callback_query);
+        var_dump($update->callback_query->data ?? null);
+//        return isset($update->callback_query);
+        return false;
     }
 
     /**
