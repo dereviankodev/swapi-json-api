@@ -1,30 +1,42 @@
 <?php
 
-namespace App\Services\Telegram\Commands;
+namespace App\Services\Telegram\Handlers;
 
 use App\Services\Telegram\Repositories\PeopleRepository;
 use Exception;
 use Illuminate\Support\Str;
-use WeStacks\TeleBot\Handlers\CommandHandler;
+use WeStacks\TeleBot\Objects\Update;
+use WeStacks\TeleBot\Interfaces\UpdateHandler;
+use WeStacks\TeleBot\TeleBot;
 
-class PeopleCommand extends CommandHandler
+class PeopleHandler extends UpdateHandler
 {
-    private const HANDLER_CLASS_SUFFIX = 'Command';
+    private const HANDLER_CLASS_SUFFIX = 'Handler';
 
-    protected static $aliases = ['/people'];
-    protected static $description = 'Send "/people" to get all the people';
     private static ?string $entityName;
+
+    public static function trigger(Update $update, TeleBot $bot): bool
+    {
+        if (!isset($update->callback_query)) {
+            return false;
+        }
+
+        static::$entityName = Str::of(class_basename(static::class))
+            ->before(static::HANDLER_CLASS_SUFFIX)
+            ->plural()
+            ->lower();
+
+        return Str::of($update->callback_query->data)
+            ->startsWith(static::$entityName);
+    }
 
     /**
      * @throws Exception
      */
     public function handle()
     {
-        static::$entityName = Str::of(class_basename(static::class))
-            ->before(static::HANDLER_CLASS_SUFFIX)
-            ->plural()
-            ->lower();
-        $entity = new PeopleRepository(static::$entityName);
+        $this->deleteMessage();
+        $entity = new PeopleRepository($this->update->callback_query->data);
         $request = $entity->getRequest();
         $description = $entity->getDescription(static::$entityName);
         $meta = $entity->getMeta();

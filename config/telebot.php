@@ -46,9 +46,11 @@ return [
             ],
 
             'handlers' => [
-                \App\Services\Telegram\Handlers\CommandsHandler::class,
                 \App\Services\Telegram\Commands\StartCommand::class,
                 \App\Services\Telegram\Commands\PeopleCommand::class,
+                \App\Services\Telegram\Commands\FilmCommand::class,
+                \App\Services\Telegram\Handlers\PeopleHandler::class,
+                \App\Services\Telegram\Handlers\FilmHandler::class,
             ],
         ],
 
