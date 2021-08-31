@@ -1,15 +1,14 @@
 <?php
 
-use App\Services\Telegram\{
-    Commands\FilmCommand,
+use App\Services\Telegram\{Commands\FilmCommand,
     Commands\PeopleCommand,
     Commands\PlanetCommand,
     Commands\SpeciesCommand,
     Commands\StarshipCommand,
     Commands\StartCommand,
     Commands\VehicleCommand,
-    Handlers\EntityHandler
-};
+    Handlers\CallbackEntityHandler,
+    Handlers\MessageEntityHandler};
 
 return [
     /*-------------------------------------------------------------------------
@@ -54,7 +53,8 @@ return [
                 StarshipCommand::class,
                 VehicleCommand::class,
 
-                EntityHandler::class
+                MessageEntityHandler::class,
+                CallbackEntityHandler::class
             ],
         ],
     ],

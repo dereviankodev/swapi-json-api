@@ -13,17 +13,17 @@ class EntityRepository extends BaseEntityRepository
     {
         if ($this->currentDataType === static::DATA_TYPE_INDEX) {
             return $this->getIndexText();
-        }/* elseif ($this->currentDataType === static::DATA_TYPE_READ) {
+        } elseif ($this->currentDataType === static::DATA_TYPE_READ) {
             return $this->getReadText();
-        }*/
+        }
     }
 
     public function getInlineKeyboard()
     {
         if ($this->currentDataType === static::DATA_TYPE_INDEX) {
             return $this->getIndexInlineKeyboard();
-        }/* elseif ($this->currentDataType === static::DATA_TYPE_READ) {
+        } elseif ($this->currentDataType === static::DATA_TYPE_READ) {
             return $this->getReadInlineKeyboard();
-        }*/
+        }
     }
 }

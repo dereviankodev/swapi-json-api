@@ -3,42 +3,37 @@
 namespace App\Services\Telegram\Handlers;
 
 use App\Services\Telegram\Repositories\EntityRepository;
-use Illuminate\Support\Str;
-use WeStacks\TeleBot\Objects\Update;
 use WeStacks\TeleBot\Interfaces\UpdateHandler;
+use WeStacks\TeleBot\Objects\Update;
 use WeStacks\TeleBot\TeleBot;
 
-class EntityHandler extends UpdateHandler
+class MessageEntityHandler extends UpdateHandler
 {
     private const ENTITY_NAME = [
-        'people',
-        'films',
-        'planets',
-        'species',
-        'starships',
-        'vehicles'
+        '👨‍🚀 People' => 'people',
+        '🎬 Films' => 'films',
+        '🪐 Planets' => 'planets',
+        '🐼 Species' => 'species',
+        '🚀 Starships' => 'starships',
+        '🛺 Vehicles' => 'vehicles'
     ];
 
     public static function trigger(Update $update, TeleBot $bot): bool
     {
-        if (!isset($update->callback_query)) {
+        if (!isset($update->message)) {
             return false;
         }
 
         $entityNames = collect(static::ENTITY_NAME);
-        $callbackCollection = Str::of($update->callback_query->data)->explode('/');
-        $resourceType = $callbackCollection->first();
 
-        return $entityNames->contains($resourceType);
+        return $entityNames->has($update->message->text);
     }
 
     public function handle()
     {
-        $entity = new EntityRepository($this->update->callback_query->data);
+        $entity = new EntityRepository(static::ENTITY_NAME[$this->update->message->text]);
         $text = $entity->getText();
         $inlineKeyboard = $entity->getInlineKeyboard();
-
-        $this->deleteMessage();
 
         $this->sendMessage([
             'text' => $text,

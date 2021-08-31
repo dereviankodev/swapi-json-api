@@ -51,8 +51,14 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
         return $text;
     }
 
-    protected function getReadText()
+    protected function getReadText(): string
     {
+        $type = ucfirst($this->currentEntityData['data']['type']);
+        $id = $this->currentEntityData['data']['id'];
+
+        return 'Detail of '.Str::of($this->resourceType)->plural().':'.PHP_EOL
+            ."<i>Type: $type,"
+            ." ID: $id</i>";
     }
 
     protected function getIndexInlineKeyboard(): array
@@ -65,7 +71,7 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
             $text = $attributes['name'] ?? $attributes['title'];
             $callback_data = $item['type'].'/'.$item['id'];
             if (isset($this->query['page']['number'])) {
-                $callback_data .= '?page[number]=' . $this->query['page']['number'];
+                $callback_data .= '?page[number]='.$this->query['page']['number'];
             }
 
             $items = [
@@ -86,6 +92,24 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
         }
 
         return $inlineKeyboard;
+    }
+
+    protected function getReadInlineKeyboard(): array
+    {
+        $pageNumber = 1;
+
+        if (isset($this->currentEntityMeta['page']['number'])) {
+            $pageNumber = $this->currentEntityMeta['page']['number'];
+        }
+
+        return [
+            [
+                [
+                    'text' => 'Back to list of '.$this->resourceType,
+                    'callback_data' => '/'.$this->resourceType.'/?page[number]='.$pageNumber
+                ]
+            ]
+        ];
     }
 
     private function getPagination(): array
@@ -155,6 +179,8 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
     {
         if (!isset($this->currentEntityData['meta']['page'])) {
             $this->currentEntityMeta = [];
+
+            return;
         }
 
         $meta = $this->currentEntityData['meta']['page'];
