@@ -8,7 +8,8 @@ use App\Services\Telegram\{Commands\FilmCommand,
     Commands\StartCommand,
     Commands\VehicleCommand,
     Handlers\CallbackEntityHandler,
-    Handlers\MessageEntityHandler};
+    Handlers\MessageEntityHandler
+};
 
 return [
     /*-------------------------------------------------------------------------

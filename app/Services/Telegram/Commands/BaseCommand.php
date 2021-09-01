@@ -7,9 +7,6 @@ use WeStacks\TeleBot\Handlers\CommandHandler;
 
 class BaseCommand extends CommandHandler
 {
-    /**
-     * @inheritDoc
-     */
     public function handle()
     {
         $entity = new EntityRepository(head(static::$aliases));

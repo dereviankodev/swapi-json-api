@@ -3,9 +3,9 @@
 namespace App\Services\Telegram\Handlers;
 
 use App\Services\Telegram\Repositories\EntityRepository;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use WeStacks\TeleBot\Exception\TeleBotRequestException;
 use WeStacks\TeleBot\Objects\Update;
 use WeStacks\TeleBot\Interfaces\UpdateHandler;
 use WeStacks\TeleBot\TeleBot;
@@ -42,7 +42,7 @@ class CallbackEntityHandler extends UpdateHandler
 
         try {
             $this->deleteMessage();
-        } catch (TeleBotRequestException $e) {
+        } catch (Exception $e) {
             Log::error($e);
         }
 

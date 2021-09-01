@@ -19,12 +19,11 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
     private string $currentFullUri;
     private array $currentEntityData;
     private array $currentEntityMeta;
-
     private string $resourceType;
     private ?string $resourceId;
     private ?string $resourceRelationship;
-    private Collection $pathCollection;
-    private array $query = [];
+    private Collection $urlPath;
+    private array $urlQuery = [];
 
     public function __construct(
         private string $alias
@@ -90,7 +89,7 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
 
     protected function getRelationshipText(): string
     {
-        $callbackName = $this->query['cb'];
+        $callbackName = $this->urlQuery['cb'];
         $relatedName = ucfirst($this->resourceRelationship);
         $text = "<strong>$relatedName associated with $callbackName</strong>".PHP_EOL;
 
@@ -123,8 +122,8 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
             $text = $attributes['name'] ?? $attributes['title'];
             $callback_data = $item['type'].'/'.$item['id'];
 
-            if (isset($this->query['page']['number'])) {
-                $callback_data .= '?page[number]='.$this->query['page']['number'];
+            if (isset($this->urlQuery['page']['number'])) {
+                $callback_data .= '?page[number]='.$this->urlQuery['page']['number'];
             }
 
             $items = [
@@ -152,7 +151,7 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
         $attributes = $this->currentEntityData['data']['attributes'];
         $entityRelationships = $this->currentEntityData['data']['relationships'] ?? [];
         $inlineKeyboard = [];
-        $pageNumber = $this->query['page']['number'] ?? 1;
+        $pageNumber = $this->urlQuery['page']['number'] ?? 1;
         $callbackName = $attributes['name'] ?? $attributes['title'];
 
         foreach ($entityRelationships as $relationship => $item) {
@@ -234,10 +233,10 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
         $comeback = [
             [
                 [
-                    'text' => '❎  Back to '.$this->query['cb'],
+                    'text' => '❎  Back to '.$this->urlQuery['cb'],
                     'callback_data' => '/'.$this->resourceType
                         .'/'.$this->resourceId
-                        .'/?page[number]='.$this->query['page']['number']
+                        .'/?page[number]='.$this->urlQuery['page']['number']
                 ]
             ]
         ];
@@ -255,15 +254,16 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
             $parsedUrl = parse_url(basename($uri));
             $query = [];
             parse_str($parsedUrl['query'], $query);
+
             if ($query['page']['number'] != $this->currentEntityMeta['current_page']) {
-                $tmp = [
+                $links = [
                     [
                         'text' => ucfirst($key),
                         'callback_data' => $parsedUrl['path'].'/?page[number]='.$query['page']['number']
                     ]
                 ];
 
-                $inlineKeyboard = array_merge($inlineKeyboard, $tmp);
+                $inlineKeyboard = array_merge($inlineKeyboard, $links);
             }
         }
 
@@ -273,40 +273,40 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
     private function parseAlias()
     {
         $parseAlias = parse_url($this->alias);
-        $this->pathCollection = Str::of($parseAlias['path'])
+        $this->urlPath = Str::of($parseAlias['path'])
             ->trim('/')
             ->explode('/');
 
-        $this->resourceType = $this->pathCollection->get(0);
-        $this->resourceId = $this->pathCollection->get(1);
-        $this->resourceRelationship = $this->pathCollection->get(2);
+        $this->resourceType = $this->urlPath->get(0);
+        $this->resourceId = $this->urlPath->get(1);
+        $this->resourceRelationship = $this->urlPath->get(2);
 
         if (isset($parseAlias['query'])) {
-            parse_str($parseAlias['query'], $this->query);
+            parse_str($parseAlias['query'], $this->urlQuery);
         }
     }
 
     private function parseDataType()
     {
-        $this->currentDataType = match ($this->pathCollection->count()) {
-            1 => static::DATA_TYPE_INDEX,
+        $this->currentDataType = match ($this->urlPath->count()) {
             2 => static::DATA_TYPE_READ,
-            3 => static::DATA_TYPE_RELATIONSHIP
+            3 => static::DATA_TYPE_RELATIONSHIP,
+            default => static::DATA_TYPE_INDEX
         };
     }
 
     private function parseFullUri()
     {
         if ($this->currentDataType === static::DATA_TYPE_INDEX) {
-            $this->currentFullUri = json_api()->url()->index($this->resourceType, $this->query);
+            $this->currentFullUri = json_api()->url()->index($this->resourceType, $this->urlQuery);
         } elseif ($this->currentDataType === static::DATA_TYPE_READ) {
-            $this->currentFullUri = json_api()->url()->read($this->resourceType, $this->resourceId, $this->query);
+            $this->currentFullUri = json_api()->url()->read($this->resourceType, $this->resourceId, $this->urlQuery);
         } elseif ($this->currentDataType === static::DATA_TYPE_RELATIONSHIP) {
             $this->currentFullUri = json_api()->url()->relatedResource(
                 $this->resourceType,
                 $this->resourceId,
                 $this->resourceRelationship,
-                $this->query
+                $this->urlQuery
             );
         }
     }
