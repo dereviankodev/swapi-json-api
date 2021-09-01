@@ -2,6 +2,7 @@
 
 namespace App\Services\Telegram\Repositories;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -12,6 +13,7 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
 {
     protected const DATA_TYPE_INDEX = 'index';
     protected const DATA_TYPE_READ = 'read';
+    protected const DATA_TYPE_RELATIONSHIP = 'relationship';
 
     protected string $currentDataType;
     private string $currentFullUri;
@@ -20,12 +22,13 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
 
     private string $resourceType;
     private ?string $resourceId;
+    private ?string $resourceRelationship;
     private Collection $pathCollection;
     private array $query = [];
 
     public function __construct(
         private string $alias
-    ) { // `/entity`, `/entity/\d+/`, `/entity/?page[number]=\d+`
+    ) {
         $this->parseAlias();
         $this->parseDataType();
         $this->parseFullUri();
@@ -56,9 +59,58 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
         $type = ucfirst($this->currentEntityData['data']['type']);
         $id = $this->currentEntityData['data']['id'];
 
-        return 'Detail of '.Str::of($this->resourceType)->plural().':'.PHP_EOL
+        $text = '<strong>Detail of '.Str::of($this->resourceType)->plural().':</strong>'.PHP_EOL
             ."<i>Type: $type,"
-            ." ID: $id</i>";
+            ." ID: $id</i>"
+            .PHP_EOL.PHP_EOL;
+
+        foreach ($this->currentEntityData['data']['attributes'] as $attribute => $value) {
+            if (is_array($value)) {
+                continue;
+            }
+
+            if ($date = strtotime($value)) {
+                $value = date('Y-m-d', $date);
+            }
+
+            $attributeFormatted = Str::of($attribute)
+                ->ucfirst()
+                ->replace('_', ' ')
+                ->start('<strong>')
+                ->finish(':</strong>'.PHP_EOL);
+            $valueFormatted = Str::of($value)
+                ->start('<em>')
+                ->finish('</em>'.PHP_EOL.PHP_EOL);
+
+            $text .= $attributeFormatted.$valueFormatted;
+        }
+
+        return $text;
+    }
+
+    protected function getRelationshipText(): string
+    {
+        $callbackName = $this->query['cb'];
+        $relatedName = ucfirst($this->resourceRelationship);
+        $text = "<strong>$relatedName associated with $callbackName</strong>".PHP_EOL;
+
+        if (is_null($this->currentEntityData['data'])) {
+            $text .= "<strong><em>No associated $relatedName</em></strong>";
+
+            return $text;
+        }
+
+        $typeRelation = 'has one';
+        $countRelatedEntity = 1;
+
+        if (!Arr::isAssoc($this->currentEntityData['data'])) {
+            $typeRelation = 'has many';
+            $countRelatedEntity = count($this->currentEntityData['data']);
+        }
+
+        $text .= "<em>Relation type: $typeRelation, Relation count: $countRelatedEntity</em>";
+
+        return $text;
     }
 
     protected function getIndexInlineKeyboard(): array
@@ -70,6 +122,7 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
             $attributes = $item['attributes'];
             $text = $attributes['name'] ?? $attributes['title'];
             $callback_data = $item['type'].'/'.$item['id'];
+
             if (isset($this->query['page']['number'])) {
                 $callback_data .= '?page[number]='.$this->query['page']['number'];
             }
@@ -96,20 +149,100 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
 
     protected function getReadInlineKeyboard(): array
     {
-        $pageNumber = 1;
+        $attributes = $this->currentEntityData['data']['attributes'];
+        $entityRelationships = $this->currentEntityData['data']['relationships'] ?? [];
+        $inlineKeyboard = [];
+        $pageNumber = $this->query['page']['number'] ?? 1;
+        $callbackName = $attributes['name'] ?? $attributes['title'];
 
-        if (isset($this->currentEntityMeta['page']['number'])) {
-            $pageNumber = $this->currentEntityMeta['page']['number'];
+        foreach ($entityRelationships as $relationship => $item) {
+            $text = ucfirst($relationship).' related';
+            $callback_data = '/'.$this->currentEntityData['data']['type']
+                .'/'.$this->currentEntityData['data']['id']
+                .'/'.$relationship
+                .'?page[number]='.$pageNumber
+                .'&cb='.$callbackName;
+
+            $items = [
+                [
+                    [
+                        'text' => $text,
+                        'callback_data' => $callback_data
+                    ]
+                ]
+            ];
+
+            $inlineKeyboard = array_merge($inlineKeyboard, $items);
         }
 
-        return [
+        $comeback = [
             [
                 [
-                    'text' => 'Back to list of '.$this->resourceType,
+                    'text' => '❎  Back to list of '.$this->resourceType,
                     'callback_data' => '/'.$this->resourceType.'/?page[number]='.$pageNumber
                 ]
             ]
         ];
+
+        return array_merge($inlineKeyboard, $comeback);
+    }
+
+    protected function getRelationshipKeyboard(): array
+    {
+        $inlineKeyboard = [];
+
+        if (!is_null($this->currentEntityData['data'])) {
+            if (Arr::isAssoc($this->currentEntityData['data'])) {
+                $attributes = $this->currentEntityData['data']['attributes'];
+                $text = $attributes['name'] ?? $attributes['title'];
+                $callback_data = '/'.$this->currentEntityData['data']['type']
+                    .'/'.$this->currentEntityData['data']['id']
+                    .'?page[number]=1';
+
+                $items = [
+                    [
+                        [
+                            'text' => $text,
+                            'callback_data' => $callback_data
+                        ]
+                    ]
+                ];
+
+                $inlineKeyboard = array_merge($inlineKeyboard, $items);
+            } else {
+                foreach ($this->currentEntityData['data'] as $item) {
+                    $attributes = $item['attributes'];
+                    $text = $attributes['name'] ?? $attributes['title'];
+                    $callback_data = '/'.$item['type']
+                        .'/'.$item['id']
+                        .'?page[number]=1';
+
+                    $items = [
+                        [
+                            [
+                                'text' => $text,
+                                'callback_data' => $callback_data
+                            ]
+                        ]
+                    ];
+
+                    $inlineKeyboard = array_merge($inlineKeyboard, $items);
+                }
+            }
+        }
+
+        $comeback = [
+            [
+                [
+                    'text' => '❎  Back to '.$this->query['cb'],
+                    'callback_data' => '/'.$this->resourceType
+                        .'/'.$this->resourceId
+                        .'/?page[number]='.$this->query['page']['number']
+                ]
+            ]
+        ];
+
+        return array_merge($inlineKeyboard, $comeback);
     }
 
     private function getPagination(): array
@@ -146,6 +279,7 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
 
         $this->resourceType = $this->pathCollection->get(0);
         $this->resourceId = $this->pathCollection->get(1);
+        $this->resourceRelationship = $this->pathCollection->get(2);
 
         if (isset($parseAlias['query'])) {
             parse_str($parseAlias['query'], $this->query);
@@ -156,7 +290,8 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
     {
         $this->currentDataType = match ($this->pathCollection->count()) {
             1 => static::DATA_TYPE_INDEX,
-            2 => static::DATA_TYPE_READ
+            2 => static::DATA_TYPE_READ,
+            3 => static::DATA_TYPE_RELATIONSHIP
         };
     }
 
@@ -166,11 +301,19 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
             $this->currentFullUri = json_api()->url()->index($this->resourceType, $this->query);
         } elseif ($this->currentDataType === static::DATA_TYPE_READ) {
             $this->currentFullUri = json_api()->url()->read($this->resourceType, $this->resourceId, $this->query);
+        } elseif ($this->currentDataType === static::DATA_TYPE_RELATIONSHIP) {
+            $this->currentFullUri = json_api()->url()->relatedResource(
+                $this->resourceType,
+                $this->resourceId,
+                $this->resourceRelationship,
+                $this->query
+            );
         }
     }
 
     private function parseData()
     {
+        var_dump($this->currentFullUri);
         $response = Http::send('GET', $this->currentFullUri);
         $this->currentEntityData = api_json_decode($response, true);
     }

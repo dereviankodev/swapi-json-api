@@ -4,26 +4,38 @@ namespace App\Services\Telegram\Repositories;
 
 class EntityRepository extends BaseEntityRepository
 {
-    public function __construct(string $alias) // `/entity`, `/entity/\d+/`, `/entity/?page[number]=\d+`
+    public function __construct(string $alias)
     {
         parent::__construct($alias);
     }
 
-    public function getText()
+    public function getText(): string
     {
+        $text = '';
+
         if ($this->currentDataType === static::DATA_TYPE_INDEX) {
-            return $this->getIndexText();
+            $text = $this->getIndexText();
         } elseif ($this->currentDataType === static::DATA_TYPE_READ) {
-            return $this->getReadText();
+            $text = $this->getReadText();
+        } elseif ($this->currentDataType === static::DATA_TYPE_RELATIONSHIP) {
+            $text = $this->getRelationshipText();
         }
+
+        return $text;
     }
 
     public function getInlineKeyboard()
     {
+        $inlineKeyboard = [];
+
         if ($this->currentDataType === static::DATA_TYPE_INDEX) {
-            return $this->getIndexInlineKeyboard();
+            $inlineKeyboard = $this->getIndexInlineKeyboard();
         } elseif ($this->currentDataType === static::DATA_TYPE_READ) {
-            return $this->getReadInlineKeyboard();
+            $inlineKeyboard = $this->getReadInlineKeyboard();
+        } elseif ($this->currentDataType === static::DATA_TYPE_RELATIONSHIP) {
+            $inlineKeyboard = $this->getRelationshipKeyboard();
         }
+
+        return $inlineKeyboard;
     }
 }
