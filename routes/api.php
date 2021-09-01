@@ -33,7 +33,7 @@ JsonApi::register('v1')->routes(function (Api $api) {
     // Films
     $api->resource('films')->relationships(function ($relations) {
         $relations->hasMany('people');
-        $relations->hasMany('planet');
+        $relations->hasMany('planets');
         $relations->hasMany('species');
         $relations->hasMany('starships');
         $relations->hasMany('vehicles');
