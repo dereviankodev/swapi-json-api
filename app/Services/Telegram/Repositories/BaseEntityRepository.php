@@ -313,7 +313,6 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
 
     private function parseData()
     {
-        var_dump($this->currentFullUri);
         $response = Http::send('GET', $this->currentFullUri);
         $this->currentEntityData = api_json_decode($response, true);
     }
