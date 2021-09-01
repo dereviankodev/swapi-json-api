@@ -24,7 +24,7 @@ class EntityRepository extends BaseEntityRepository
         return $text;
     }
 
-    public function getInlineKeyboard()
+    public function getInlineKeyboard(): array
     {
         $inlineKeyboard = [];
 
