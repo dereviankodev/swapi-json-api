@@ -33,11 +33,11 @@ return [
             'inline_keyboard' => [
                 'callback' => [
                     'text' => ':Relationship related',
-                    'path' => ':type/:id/:related?page[number]=:number&cd=:callback_name'
+                    'path' => '/:type/:id/:related?page[number]=:number&cb=:callback_name'
                 ],
                 'comeback' => [
                     'text' => '❎  Back to list of :resource_type',
-                    'data' => ':resource_type?page[number]=:number'
+                    'data' => '/:resource_type/?page[number]=:number'
                 ]
             ]
         ],
@@ -53,18 +53,18 @@ return [
             ],
             'inline_keyboard' => [
                 'callback' => [
-                    'data' => ':type/:id?page[number]=1'
+                    'data' => '/:type/:id?page[number]=1'
                 ],
                 'comeback' => [
                     'text' => '❎  Back to :cb',
-                    'data' => ':type/:id?page[number]=:number'
+                    'data' => '/:type/:id/?page[number]=:number'
                 ]
             ]
         ],
         'pagination' => [
             'inline_keyboard' => [
                 'callback' => [
-                    'data' => ':path?page[number]=:number'
+                    'data' => ':path/?page[number]=:number'
                 ],
             ]
         ],
