@@ -20,6 +20,10 @@ class StartCommand extends CommandHandler
                 'input_field_placeholder' => __('telebot.command.start.input_field_placeholder'),
             ]
         ]);
+
+        $this->sendSticker([
+            'sticker' => 'CAACAgIAAxkBAAIFRWEwxDiEIIUuq5dbRrBrIXG54ErmAAL1AgACnNbnCgM_eoMQLg5vIAQ'
+        ]);
     }
 
     private function getKeyboard(): array

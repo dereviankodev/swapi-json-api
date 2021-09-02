@@ -23,7 +23,7 @@ class CallbackEntityHandler extends UpdateHandler
 
     public static function trigger(Update $update, TeleBot $bot): bool
     {
-        if (!isset($update->callback_query)) {
+        if (!isset($update->callback_query) || !isset($update->callback_query->data)) {
             return false;
         }
 

@@ -8,8 +8,8 @@ use App\Services\Telegram\{Commands\FilmCommand,
     Commands\StartCommand,
     Commands\VehicleCommand,
     Handlers\CallbackEntityHandler,
-    Handlers\MessageEntityHandler
-};
+    Handlers\MessageEntityHandler,
+    Handlers\SearchableEntityHandler};
 
 return [
     /*-------------------------------------------------------------------------
@@ -55,7 +55,8 @@ return [
                 VehicleCommand::class,
 
                 MessageEntityHandler::class,
-                CallbackEntityHandler::class
+                CallbackEntityHandler::class,
+                SearchableEntityHandler::class,
             ],
         ],
     ],

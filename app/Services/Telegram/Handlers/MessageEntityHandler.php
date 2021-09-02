@@ -20,7 +20,7 @@ class MessageEntityHandler extends UpdateHandler
 
     public static function trigger(Update $update, TeleBot $bot): bool
     {
-        if (!isset($update->message)) {
+        if (!isset($update->message) || !isset($update->message->text)) {
             return false;
         }
 

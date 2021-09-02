@@ -14,6 +14,14 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
     protected const DATA_TYPE_INDEX = 'index';
     protected const DATA_TYPE_READ = 'read';
     protected const DATA_TYPE_RELATED = 'related';
+    public const SEARCHABLE_ATTRIBUTES = [
+        'people' => ['name'],
+        'films' => ['title'],
+        'planets' => ['name'],
+        'species' => ['name'],
+        'starships' => ['name', 'model'],
+        'vehicles' => ['name', 'model'],
+    ];
 
     protected string $currentDataType;
     private string $currentFullUri;
@@ -124,6 +132,17 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
     {
         $entityData = $this->currentEntityData;
         $inlineKeyboard = [];
+
+        $search = [
+            [
+                [
+                    'text' => '🔎  Search by '.implode(', ', static::SEARCHABLE_ATTRIBUTES[$this->resourceType]).' of '.$this->resourceType.'  🔍',
+//                    'callback_data' => 'search/'.$this->resourceType
+                    'callback_data' => '/'.$this->resourceType
+                ]
+            ]
+        ];
+        $inlineKeyboard = array_merge($inlineKeyboard, $search);
 
         foreach ($entityData['data'] as $item) {
             $attributes = $item['attributes'];
