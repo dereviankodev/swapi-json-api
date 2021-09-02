@@ -10,14 +10,12 @@ class BaseCommand extends CommandHandler
     public function handle()
     {
         $entity = new EntityRepository(head(static::$aliases));
-        $text = $entity->getText();
-        $inlineKeyboard = $entity->getInlineKeyboard();
 
         $this->sendMessage([
-            'text' => $text,
+            'text' => $entity->getText(),
             'parse_mode' => 'HTML',
             'reply_markup' => [
-                'inline_keyboard' => $inlineKeyboard
+                'inline_keyboard' => $entity->getInlineKeyboard()
             ]
         ]);
     }

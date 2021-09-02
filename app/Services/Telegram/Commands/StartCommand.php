@@ -12,33 +12,31 @@ class StartCommand extends CommandHandler
     public function handle()
     {
         $this->sendMessage([
-            'text' => $this->greeting(),
+            'text' => __('telebot.command.start.text', ['name' => $this->update->user()->first_name]),
             'reply_markup' => [
-                'keyboard' => [
-                    [
-                        ['text' => '👨‍🚀 People'],
-                        ['text' => '🎬 Films'],
-                    ],
-                    [
-                        ['text' => '🪐 Planets'],
-                        ['text' => '🐼 Species'],
-                    ],
-                    [
-                        ['text' => '🚀 Starships'],
-                        ['text' => '🛺 Vehicles'],
-                    ],
-                ],
+                'keyboard' => $this->getKeyboard(),
                 'resize_keyboard' => true,
                 'one_time_keyboard' => true,
-                'input_field_placeholder' => 'Select the section you are interested in ...',
+                'input_field_placeholder' => __('telebot.command.start.input_field_placeholder'),
             ]
         ]);
     }
 
-    private function greeting(): string
+    private function getKeyboard(): array
     {
-        return "Hello, {$this->update->user()->first_name}!".PHP_EOL.PHP_EOL
-            .'Welcome to the world of Star Wars!'.PHP_EOL.PHP_EOL
-            .'Select one of the following commands to get a list';
+        return [
+            [
+                ['text' => __('telebot.command.start.keyboard.people')],
+                ['text' => __('telebot.command.start.keyboard.films')],
+            ],
+            [
+                ['text' => __('telebot.command.start.keyboard.planets')],
+                ['text' => __('telebot.command.start.keyboard.species')],
+            ],
+            [
+                ['text' => __('telebot.command.start.keyboard.starships')],
+                ['text' => __('telebot.command.start.keyboard.vehicles')],
+            ],
+        ];
     }
 }

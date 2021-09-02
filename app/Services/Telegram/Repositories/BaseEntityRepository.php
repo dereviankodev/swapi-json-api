@@ -13,7 +13,7 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
 {
     protected const DATA_TYPE_INDEX = 'index';
     protected const DATA_TYPE_READ = 'read';
-    protected const DATA_TYPE_RELATIONSHIP = 'relationship';
+    protected const DATA_TYPE_RELATED = 'related';
 
     protected string $currentDataType;
     private string $currentFullUri;
@@ -21,7 +21,7 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
     private array $currentEntityMeta;
     private string $resourceType;
     private ?string $resourceId;
-    private ?string $resourceRelationship;
+    private ?string $resourceRelated;
     private Collection $urlPath;
     private array $urlQuery = [];
 
@@ -41,13 +41,14 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
 
     protected function getIndexText(): string
     {
-        $text = 'List of '.Str::of($this->resourceType)->plural().':';
+        $text = __('telebot.repository.index.text', ['resource_type' => Str::of($this->resourceType)->plural()]);
 
         if (!empty($this->currentEntityMeta)) {
-            $text .= PHP_EOL
-                ."<i>Total: {$this->currentEntityMeta['total']},"
-                ." Current page: {$this->currentEntityMeta['current_page']},"
-                ." Total page: {$this->currentEntityMeta['total_page']}</i>";
+            $text .= __('telebot.repository.index.meta', [
+                'total' => $this->currentEntityMeta['total'],
+                'current_page' => $this->currentEntityMeta['current_page'],
+                'total_page' => $this->currentEntityMeta['total_page']
+            ]);
         }
 
         return $text;
@@ -58,10 +59,11 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
         $type = ucfirst($this->currentEntityData['data']['type']);
         $id = $this->currentEntityData['data']['id'];
 
-        $text = '<strong>Detail of '.Str::of($this->resourceType)->plural().':</strong>'.PHP_EOL
-            ."<i>Type: $type,"
-            ." ID: $id</i>"
-            .PHP_EOL.PHP_EOL;
+        $text = __('telebot.repository.read.text', [
+            'resource_type' => Str::of($this->resourceType)->plural(),
+            'type' => $type,
+            'id' => $id
+        ]);
 
         foreach ($this->currentEntityData['data']['attributes'] as $attribute => $value) {
             if (is_array($value)) {
@@ -87,27 +89,33 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
         return $text;
     }
 
-    protected function getRelationshipText(): string
+    protected function getRelatedText(): string
     {
         $callbackName = $this->urlQuery['cb'];
-        $relatedName = ucfirst($this->resourceRelationship);
-        $text = "<strong>$relatedName associated with $callbackName</strong>".PHP_EOL;
+        $relatedName = ucfirst($this->resourceRelated);
+        $text = __('telebot.repository.related.text.associated', [
+            'related_name' => $relatedName,
+            'callback_name' => $callbackName
+        ]);
 
         if (is_null($this->currentEntityData['data'])) {
-            $text .= "<strong><em>No associated $relatedName</em></strong>";
+            $text .= __('telebot.repository.related.text.no_associated', ['related_name' => $relatedName]);
 
             return $text;
         }
 
-        $typeRelation = 'has one';
+        $typeRelation = __('telebot.repository.related.type.has_one');
         $countRelatedEntity = 1;
 
         if (!Arr::isAssoc($this->currentEntityData['data'])) {
-            $typeRelation = 'has many';
+            $typeRelation = __('telebot.repository.related.type.has_many');
             $countRelatedEntity = count($this->currentEntityData['data']);
         }
 
-        $text .= "<em>Relation type: $typeRelation, Relation count: $countRelatedEntity</em>";
+        $text .= __('telebot.repository.related.meta', [
+            'type' => $typeRelation,
+            'count' => $countRelatedEntity
+        ]);
 
         return $text;
     }
@@ -120,10 +128,15 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
         foreach ($entityData['data'] as $item) {
             $attributes = $item['attributes'];
             $text = $attributes['name'] ?? $attributes['title'];
-            $callback_data = $item['type'].'/'.$item['id'];
+            $callback_data = __('telebot.repository.index.inline_keyboard.callback.path', [
+                'type' => $item['type'],
+                'id' => $item['id']
+            ]);
 
             if (isset($this->urlQuery['page']['number'])) {
-                $callback_data .= '?page[number]='.$this->urlQuery['page']['number'];
+                $callback_data .= __('telebot.repository.index.inline_keyboard.callback.query', [
+                    'number' => $this->urlQuery['page']['number']
+                ]);
             }
 
             $items = [
@@ -155,12 +168,14 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
         $callbackName = $attributes['name'] ?? $attributes['title'];
 
         foreach ($entityRelationships as $relationship => $item) {
-            $text = ucfirst($relationship).' related';
-            $callback_data = '/'.$this->currentEntityData['data']['type']
-                .'/'.$this->currentEntityData['data']['id']
-                .'/'.$relationship
-                .'?page[number]='.$pageNumber
-                .'&cb='.$callbackName;
+            $text = __('telebot.repository.read.inline_keyboard.callback.text', ['relationship' => $relationship]);
+            $callback_data = __('telebot.repository.read.inline_keyboard.callback.path', [
+                'type' => $this->currentEntityData['data']['type'],
+                'id' => $this->currentEntityData['data']['id'],
+                'related' => $relationship,
+                'number' => $pageNumber,
+                'callback_name' => $callbackName
+            ]);
 
             $items = [
                 [
@@ -177,8 +192,13 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
         $comeback = [
             [
                 [
-                    'text' => '❎  Back to list of '.$this->resourceType,
-                    'callback_data' => '/'.$this->resourceType.'/?page[number]='.$pageNumber
+                    'text' => __('telebot.repository.read.inline_keyboard.comeback.text', [
+                        'resource_type' => $this->resourceType
+                    ]),
+                    'callback_data' => __('telebot.repository.read.inline_keyboard.comeback.data', [
+                        'resource_type' => $this->resourceType,
+                        'number' => $pageNumber
+                    ])
                 ]
             ]
         ];
@@ -186,7 +206,7 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
         return array_merge($inlineKeyboard, $comeback);
     }
 
-    protected function getRelationshipKeyboard(): array
+    protected function getRelatedKeyboard(): array
     {
         $inlineKeyboard = [];
 
@@ -194,9 +214,10 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
             if (Arr::isAssoc($this->currentEntityData['data'])) {
                 $attributes = $this->currentEntityData['data']['attributes'];
                 $text = $attributes['name'] ?? $attributes['title'];
-                $callback_data = '/'.$this->currentEntityData['data']['type']
-                    .'/'.$this->currentEntityData['data']['id']
-                    .'?page[number]=1';
+                $callback_data = __('telebot.repository.related.inline_keyboard.callback.data', [
+                    'type' => $this->currentEntityData['data']['type'],
+                    'id' => $this->currentEntityData['data']['id']
+                ]);
 
                 $items = [
                     [
@@ -212,9 +233,10 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
                 foreach ($this->currentEntityData['data'] as $item) {
                     $attributes = $item['attributes'];
                     $text = $attributes['name'] ?? $attributes['title'];
-                    $callback_data = '/'.$item['type']
-                        .'/'.$item['id']
-                        .'?page[number]=1';
+                    $callback_data = __('telebot.repository.related.inline_keyboard.callback.data', [
+                        'type' => $item['type'],
+                        'id' => $item['id']
+                    ]);
 
                     $items = [
                         [
@@ -233,10 +255,14 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
         $comeback = [
             [
                 [
-                    'text' => '❎  Back to '.$this->urlQuery['cb'],
-                    'callback_data' => '/'.$this->resourceType
-                        .'/'.$this->resourceId
-                        .'/?page[number]='.$this->urlQuery['page']['number']
+                    'text' => __('telebot.repository.related.inline_keyboard.comeback.text', [
+                        'cb' => $this->urlQuery['cb']
+                    ]),
+                    'callback_data' => __('telebot.repository.related.inline_keyboard.comeback.data', [
+                        'type' => $this->resourceType,
+                        'id' => $this->resourceId,
+                        'number' => $this->urlQuery['page']['number']
+                    ])
                 ]
             ]
         ];
@@ -259,7 +285,10 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
                 $links = [
                     [
                         'text' => ucfirst($key),
-                        'callback_data' => $parsedUrl['path'].'/?page[number]='.$query['page']['number']
+                        'callback_data' => __('telebot.repository.pagination.inline_keyboard.callback.data', [
+                            'path' => $parsedUrl['path'],
+                            'number' => $query['page']['number']
+                        ])
                     ]
                 ];
 
@@ -279,7 +308,7 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
 
         $this->resourceType = $this->urlPath->get(0);
         $this->resourceId = $this->urlPath->get(1);
-        $this->resourceRelationship = $this->urlPath->get(2);
+        $this->resourceRelated = $this->urlPath->get(2);
 
         if (isset($parseAlias['query'])) {
             parse_str($parseAlias['query'], $this->urlQuery);
@@ -290,7 +319,7 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
     {
         $this->currentDataType = match ($this->urlPath->count()) {
             2 => static::DATA_TYPE_READ,
-            3 => static::DATA_TYPE_RELATIONSHIP,
+            3 => static::DATA_TYPE_RELATED,
             default => static::DATA_TYPE_INDEX
         };
     }
@@ -301,11 +330,11 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
             $this->currentFullUri = json_api()->url()->index($this->resourceType, $this->urlQuery);
         } elseif ($this->currentDataType === static::DATA_TYPE_READ) {
             $this->currentFullUri = json_api()->url()->read($this->resourceType, $this->resourceId, $this->urlQuery);
-        } elseif ($this->currentDataType === static::DATA_TYPE_RELATIONSHIP) {
+        } elseif ($this->currentDataType === static::DATA_TYPE_RELATED) {
             $this->currentFullUri = json_api()->url()->relatedResource(
                 $this->resourceType,
                 $this->resourceId,
-                $this->resourceRelationship,
+                $this->resourceRelated,
                 $this->urlQuery
             );
         }
@@ -326,11 +355,12 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
         }
 
         $meta = $this->currentEntityData['meta']['page'];
+        $unknown = __('telebot.repository.meta.unknown');
 
         $this->currentEntityMeta = [
-            'total' => $meta['total'] ?? 'Unknown',
-            'current_page' => $meta['current-page'] ?? 'Unknown',
-            'total_page' => $meta['last-page'] ?? 'Unknown'
+            'total' => $meta['total'] ?? $unknown,
+            'current_page' => $meta['current-page'] ?? $unknown,
+            'total_page' => $meta['last-page'] ?? $unknown
         ];
     }
 }

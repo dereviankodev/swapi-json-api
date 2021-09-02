@@ -11,31 +11,21 @@ class EntityRepository extends BaseEntityRepository
 
     public function getText(): string
     {
-        $text = '';
-
-        if ($this->currentDataType === static::DATA_TYPE_INDEX) {
-            $text = $this->getIndexText();
-        } elseif ($this->currentDataType === static::DATA_TYPE_READ) {
-            $text = $this->getReadText();
-        } elseif ($this->currentDataType === static::DATA_TYPE_RELATIONSHIP) {
-            $text = $this->getRelationshipText();
-        }
-
-        return $text;
+        return match ($this->currentDataType) {
+            static::DATA_TYPE_INDEX => $this->getIndexText(),
+            static::DATA_TYPE_READ => $this->getReadText(),
+            static::DATA_TYPE_RELATED => $this->getRelatedText(),
+            default => ''
+        };
     }
 
     public function getInlineKeyboard(): array
     {
-        $inlineKeyboard = [];
-
-        if ($this->currentDataType === static::DATA_TYPE_INDEX) {
-            $inlineKeyboard = $this->getIndexInlineKeyboard();
-        } elseif ($this->currentDataType === static::DATA_TYPE_READ) {
-            $inlineKeyboard = $this->getReadInlineKeyboard();
-        } elseif ($this->currentDataType === static::DATA_TYPE_RELATIONSHIP) {
-            $inlineKeyboard = $this->getRelationshipKeyboard();
-        }
-
-        return $inlineKeyboard;
+        return match ($this->currentDataType) {
+            static::DATA_TYPE_INDEX => $this->getIndexInlineKeyboard(),
+            static::DATA_TYPE_READ => $this->getReadInlineKeyboard(),
+            static::DATA_TYPE_RELATED => $this->getRelatedKeyboard(),
+            default => []
+        };
     }
 }
