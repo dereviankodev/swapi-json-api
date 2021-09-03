@@ -17,8 +17,9 @@ class ByeHandler extends UpdateHandler
         }
 
         return Str::contains($update->message->text, [
-            'bye', 'Bye', 'good day', 'good one', 'care', 'later', 'Farewell', 'farewell', 'right then', 'it easy',
-            'out', 'Godspeed', 'godspeed'
+            'bye', 'Bye', 'Have a', 'have a', 'good day', 'good one', 'care', 'later', 'Farewell', 'farewell',
+            'right then', 'it easy', 'out', 'Godspeed', 'godspeed', 'Take it', 'take it', 'Peace', 'peace', 'I\'m out',
+            'i\'m out', 'gotta', 'Toodle', 'toodle'
         ]);
     }
 
