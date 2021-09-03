@@ -4,7 +4,7 @@ namespace App\Services\Telegram\Handlers;
 
 use App\Services\Telegram\Repositories\BaseEntityRepository;
 use App\Services\Telegram\Repositories\EntityRepository;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use WeStacks\TeleBot\Interfaces\UpdateHandler;
 use WeStacks\TeleBot\Objects\Update;
@@ -12,30 +12,42 @@ use WeStacks\TeleBot\TeleBot;
 
 class SearchableEntityHandler extends UpdateHandler
 {
-    public const SEARCHABLE_URI_START_WITH = 'search';
+    private static Collection $message;
 
     public static function trigger(Update $update, TeleBot $bot): bool
     {
-        if (!isset($update->callback_query) || !isset($update->callback_query->data)) {
+        if (!isset($update->message) || !isset($update->message->text)) {
             return false;
         }
 
-        return Str::of($update->callback_query->data)->trim('/')
-            ->startsWith(static::SEARCHABLE_URI_START_WITH);
+        static::$message = Str::of($update->message->text)->trim()->lower()->explode(' ', 2);
+        $searchableAttributes = collect(BaseEntityRepository::SEARCHABLE_ATTRIBUTES);
+
+        return $searchableAttributes->has(static::$message->first());
     }
 
     public function handle()
     {
-        $entity = Str::of($this->update->callback_query->data)->remove(static::SEARCHABLE_URI_START_WITH)->trim('/');
-        $text = 'Enter to search a '
-            .implode(' or ', BaseEntityRepository::SEARCHABLE_ATTRIBUTES[(string) $entity])
-            .' from the list of '.$entity;
+        $command = '/'.static::$message->first().'?filter[field]='.static::$message->last();
+        $entity = new EntityRepository($command);
+        $text = $entity->getText();
+        $inlineKeyboard = $entity->getInlineKeyboard();
+
+        if (Str::contains($text, 'Total: 0,')) {
+            $this->sendSticker([
+                'sticker' => __('telebot.stickers.not_found')
+            ]);
+        } else {
+            $this->sendSticker([
+                'sticker' => __('telebot.stickers.found')
+            ]);
+        }
+
         $this->sendMessage([
             'text' => $text,
             'parse_mode' => 'HTML',
             'reply_markup' => [
-                'force_reply' => true,
-                'input_field_placeholder' => $text
+                'inline_keyboard' => $inlineKeyboard
             ]
         ]);
     }
