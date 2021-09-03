@@ -5,7 +5,8 @@ use App\Services\Telegram\{Commands\StartCommand,
     Handlers\CallbackEntityHandler,
     Handlers\MessageEntityHandler,
     Handlers\SearchableEntityHandler,
-    Handlers\SearchHelperHandler};
+    Handlers\SearchHelperHandler
+};
 
 return [
     /*-------------------------------------------------------------------------

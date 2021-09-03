@@ -9,7 +9,6 @@ use WeStacks\TeleBot\TeleBot;
 
 class ByeHandler extends UpdateHandler
 {
-
     public static function trigger(Update $update, TeleBot $bot): bool
     {
         if (!isset($update->message) || !isset($update->message->text)) {
