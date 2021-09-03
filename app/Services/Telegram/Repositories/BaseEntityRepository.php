@@ -11,9 +11,6 @@ use function CloudCreativity\LaravelJsonApi\json_decode as api_json_decode;
 
 abstract class BaseEntityRepository implements EntityRepositoryInterface
 {
-    protected const DATA_TYPE_INDEX = 'index';
-    protected const DATA_TYPE_READ = 'read';
-    protected const DATA_TYPE_RELATED = 'related';
     public const SEARCHABLE_ATTRIBUTES = [
         'people' => ['name'],
         'films' => ['title'],
@@ -22,6 +19,9 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
         'starships' => ['name', 'model'],
         'vehicles' => ['name', 'model'],
     ];
+    protected const DATA_TYPE_INDEX = 'index';
+    protected const DATA_TYPE_READ = 'read';
+    protected const DATA_TYPE_RELATED = 'related';
 
     protected string $currentDataType;
     private string $currentFullUri;
@@ -136,9 +136,13 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
         $search = [
             [
                 [
-                    'text' => '🔎  Search by '.implode(', ', static::SEARCHABLE_ATTRIBUTES[$this->resourceType]).' of '.$this->resourceType.'  🔍',
-//                    'callback_data' => 'search/'.$this->resourceType
-                    'callback_data' => '/'.$this->resourceType
+                    'text' => __('telebot.repository.index.inline_keyboard.search.text', [
+                        'names' => implode(' OR ', static::SEARCHABLE_ATTRIBUTES[$this->resourceType]),
+                        'resource_type' => $this->resourceType
+                    ]),
+                    'callback_data' => __('telebot.repository.index.inline_keyboard.search.data', [
+                        'resource_type' => $this->resourceType
+                    ])
                 ]
             ]
         ];
@@ -166,13 +170,29 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
                     ]
                 ]
             ];
-
             $inlineKeyboard = array_merge($inlineKeyboard, $items);
         }
 
         if (isset($entityData['links'])) {
             $pagination = $this->getPagination();
             $inlineKeyboard = array_merge($inlineKeyboard, [$pagination]);
+        }
+
+        if (isset($this->urlQuery['filter']['field'])) {
+            $filter = $this->urlQuery['filter']['field'];
+            if (!empty($filter)) {
+                $callback_filter = [
+                    [
+                        [
+                            'text' => __('telebot.repository.index.inline_keyboard.filter.text'),
+                            'callback_data' => __('telebot.repository.index.inline_keyboard.filter.data', [
+                                'resource_type' => $this->resourceType
+                            ])
+                        ]
+                    ]
+                ];
+                $inlineKeyboard = array_merge($inlineKeyboard, $callback_filter);
+            }
         }
 
         return $inlineKeyboard;
@@ -306,7 +326,8 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
                         'text' => ucfirst($key),
                         'callback_data' => __('telebot.repository.pagination.inline_keyboard.callback.data', [
                             'path' => $parsedUrl['path'],
-                            'number' => $query['page']['number']
+                            'number' => $query['page']['number'],
+                            'filter' => $query['filter']['field'] ?? ''
                         ])
                     ]
                 ];

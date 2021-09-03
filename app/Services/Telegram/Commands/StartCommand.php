@@ -22,7 +22,7 @@ class StartCommand extends CommandHandler
         ]);
 
         $this->sendSticker([
-            'sticker' => 'CAACAgIAAxkBAAIFRWEwxDiEIIUuq5dbRrBrIXG54ErmAAL1AgACnNbnCgM_eoMQLg5vIAQ'
+            'sticker' => __('telebot.stickers.greetings')
         ]);
     }
 

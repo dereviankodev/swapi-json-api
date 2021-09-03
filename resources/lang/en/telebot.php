@@ -22,9 +22,17 @@ return [
             'text' => '<strong>List of :resource_type:</strong>',
             'meta' => PHP_EOL.'<i>Total: :total, Current page: :current_page, Total page: :total_page</i>',
             'inline_keyboard' => [
+                'search' => [
+                    'text' => '🔎  SEARCH BY :names OF :resource_type  🔍',
+                    'data' => 'search/:resource_type',
+                ],
                 'callback' => [
                     'path' => ':type/:id',
                     'query' => '?page[number]=:number',
+                ],
+                'filter' => [
+                    'text' => '🔄  RESET SEARCH  🔄',
+                    'data' => '/:resource_type'
                 ]
             ]
         ],
@@ -64,12 +72,24 @@ return [
         'pagination' => [
             'inline_keyboard' => [
                 'callback' => [
-                    'data' => ':path/?page[number]=:number'
+                    'data' => ':path/?page[number]=:number&filter[field]=:filter'
                 ],
             ]
         ],
         'meta' => [
             'unknown' => 'Unknown'
         ]
+    ],
+    'handler' => [
+        'search_helper' => [
+            'text' => 'To search by :type in the :Entity category, enter a message like:'
+                .PHP_EOL
+                .'<code>:entity :type</code>'
+        ]
+    ],
+    'stickers' => [
+        'greetings' => 'CAACAgIAAxkBAAIFRWEwxDiEIIUuq5dbRrBrIXG54ErmAAL1AgACnNbnCgM_eoMQLg5vIAQ',
+        'found' => 'CAACAgIAAxkBAAIG-mEyD3UnatK9r8JP_WqcGPIMogzNAAIFAwACnNbnCuOG1zGKBI8MIAQ',
+        'not_found' => 'CAACAgIAAxkBAAIGzWEyDq1pdwAB9bD4b0wMmgxgJoo2nQACCgMAApzW5wqr8MC_0VahqCAE',
     ]
 ];

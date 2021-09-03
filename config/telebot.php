@@ -1,15 +1,11 @@
 <?php
 
-use App\Services\Telegram\{Commands\FilmCommand,
-    Commands\PeopleCommand,
-    Commands\PlanetCommand,
-    Commands\SpeciesCommand,
-    Commands\StarshipCommand,
-    Commands\StartCommand,
-    Commands\VehicleCommand,
+use App\Services\Telegram\{Commands\StartCommand,
+    Handlers\ByeHandler,
     Handlers\CallbackEntityHandler,
     Handlers\MessageEntityHandler,
-    Handlers\SearchableEntityHandler};
+    Handlers\SearchableEntityHandler,
+    Handlers\SearchHelperHandler};
 
 return [
     /*-------------------------------------------------------------------------
@@ -47,16 +43,12 @@ return [
 
             'handlers' => [
                 StartCommand::class,
-                PeopleCommand::class,
-                FilmCommand::class,
-                PlanetCommand::class,
-                SpeciesCommand::class,
-                StarshipCommand::class,
-                VehicleCommand::class,
 
-                MessageEntityHandler::class,
                 CallbackEntityHandler::class,
+                MessageEntityHandler::class,
+                SearchHelperHandler::class,
                 SearchableEntityHandler::class,
+                ByeHandler::class
             ],
         ],
     ],
