@@ -213,7 +213,7 @@ abstract class BaseEntityRepository implements EntityRepositoryInterface
                 'id' => $this->currentEntityData['data']['id'],
                 'related' => $relationship,
                 'number' => $pageNumber,
-                'callback_name' => $callbackName
+                'callback_name' => Str::words($callbackName, 2, '...')
             ]);
 
             $items = [
