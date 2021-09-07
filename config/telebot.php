@@ -1,6 +1,7 @@
 <?php
 
-use App\Services\Telegram\{Commands\StartCommand,
+use App\Services\Telegram\{
+    Commands\StartCommand,
     Handlers\ByeHandler,
     Handlers\CallbackEntityHandler,
     Handlers\MessageEntityHandler,
