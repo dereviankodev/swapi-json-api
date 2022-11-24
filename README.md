@@ -2,7 +2,7 @@
 
 ## SWAPI Laravel json api
 
-Tech task:
+**Tech task**:
   1. Реализовать api на основе [swapi.dev](https://swapi.dev) с помощью
     [cloudcreativity/laravel-json-api](https://github.com/cloudcreativity/laravel-json-api)
     (устарел, сейчас [laravel-json-api/laravel](https://github.com/laravel-json-api/laravel)).
