@@ -1,6 +1,6 @@
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
 
-##SWAPI Laravel json api
+## SWAPI Laravel json api
 
 Tech task:
   1. Реализовать api на основе [swapi.dev](https://swapi.dev) с помощью
